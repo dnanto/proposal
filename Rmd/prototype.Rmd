@@ -1,6 +1,9 @@
 ---
 params:
-  root: "../data"
+  root: "../exp/hex"
+  db: "10508"
+  entry: "FJ643676"
+  range: "18233-21073"
   pidn: 90
 ---
 
@@ -11,56 +14,39 @@ knitr::opts_chunk$set(echo = F)
 do.call(Sys.setenv, params)
 ```
 
-Download source feature metadata from NCBI.
+Local Alignment
 
 ```{bash}
-[[ -f "$root/blast.tsv" ]] && awk '/^[^#]/ { print $2; }' "$root/blast.tsv" | uniq > "$root/acc.txt"
-
-{ 
-  printf "accver\ttaxid\ttitle\tsubtype\tsubname\n"; 
-  ../py/eutil.py "$root/acc.txt" -eutil esummary -param retmode=json | \
-    tee "$root/src.json" | \
-    jq -r '.result | del(.uids) | map([.accessionversion, .taxid, .title, .subtype, .subname] | @tsv) | .[]' 
-} | \
-  ../R/subtype.R - subtype subname 2> /dev/null | \
-  ../R/lubridate.R - collection_date 2> /dev/null > "$root/src.tsv"
+mkdir -p "$root"
+blastdbcmd -db "$db" -entry "$entry" -range "$range" > "$root/qry.fna"
+blastn \
+  -task blastn -num_threads 8 -max_target_seqs 20000 \
+  -db "$db" -query "$root/qry.fna" -outfmt 7 > "$root/blast.tsv"
 ```
 
-Download sequences from NCBI.
+Global/Local Alignment
 
 ```{bash}
-n="$(head -n 1 "$root/src.tsv" | tr '\t' '\n' | cat -n | grep collection_date | cut -f 1 | tr -d ' ')"
-
-cut -f 1,2,"$n" "$root/src.tsv" | \
-  awk 'NR > 1 && $3 != "NA"' | \
-  sort -k 3 | \
-  tee >(awk '{ printf "s/(%s.*)/\\1|%s|%d/\n", $1, $3, $2; }' > "$root/def.sed") | \
-  cut -f 1 | \
-  ../py/eutil.py - -param rettype=fasta > "$root/lib.fna"
+awk '/^[^#]/ { print $2; }' "$root/blast.tsv" | uniq > "$root/acc.txt"
+blastdbcmd -db "$db" -entry_batch "$root/acc.txt" > "$root/lib.fna"
+glsearch36 -m 8CB -T 8 "$root/qry.fna" "$root/lib.fna" > "$root/glsearch.tsv"
 ```
 
-Perform global/local alignment.
-
-```{bash}
-glsearch36 -m 8CB -T 8 "$root/qry.fna" "$root/lib.fna" > "$root/aln.tsv"
-```
-
-Extract subject regions with identity greater than or equal to the threshold.
+Extract
 
 ```{bash}
 rm -f "$root/lib.fna.fai"
-awk -v id="$pidn" '/^[^#]/ && $3 >= id { printf "%s:%d-%d\n", $2, $9, $10; }' "$root/aln.tsv" | \
-  samtools faidx "$root/lib.fna" -r - | \
-  sed -E -f "$root/def.sed" > "$root/reg.fna"
+awk -v id="$pidn" '/^[^#]/ && $3 >= id { printf "%s:%d-%d\n", $2, $9, $10; }' "$root/glsearch.tsv" | \
+  samtools faidx "$root/lib.fna" -r - > "$root/reg.fna"
 ```
 
-Perform multiple alignment.
+Multiple Alignment
 
 ```{bash}
 mafft --auto --adjustdirection --thread -1 "$root/reg.fna" > "$root/msa.fna" 2> "$root/msa.log"
 ```
 
-Visualize SNPs and indels.
+MUTT
 
 ```{r, fig.width=10, fig.height=4}
 msa <- 
@@ -73,43 +59,13 @@ df.snp <- call_snp(msa)
 df.ind <- call_ind(msa)
 
 ggplot() +
-  geom_point(data = df.snp, aes(pos, accver, shape = call, color = call), size = 8) +
-  geom_point(data = df.ind, aes(pos, accver, shape = call), size = 4, position = position_nudge(y = 0.25)) +
+  geom_point(data = df.snp, aes(pos, id, shape = call, color = call), size = 8) +
+  geom_point(data = df.ind, aes(pos, id, shape = call), size = 4, position = position_nudge(y = 0.25)) +
   scale_shape_manual(values = setNames(
     c(124, 124, 124, 124, 6, 2), 
     c("trs", "trv", "sim", "dis", "ins", "del")
   )) +
-  facet_grid(taxid ~ ., scales = "free_y") +
   xlim(1, ncol(msa)) + 
   theme_minimal() + 
   theme(legend.position = "bottom")
-```
-
-Infer tree...
-
-```{bash}
-rm -f "$root/phy."*
-iqtree -s "$root/msa.fna" -pre "$root/phy" -alrt 1000 -bb 1000 -bnni -nt AUTO
-```
-
-Evaluate clock signal...
-
-```{r}
-tre <-
-  file.path(params$root, "phy.treefile") %>%
-  ape::read.tree()
-
-tre$meta <-
-  enframe(tre$tip.label, name = NULL) %>%
-  separate(value, c("accver", "range", "collection_date", "taxid"), "_", convert = T) %>%
-  mutate_at("collection_date", as.Date)
-
-tre$tip.label <- tre$meta$accver
-
-sts <- with(tre$meta, setNames(as.numeric(collection_date), accver))
-
-s <- ncol(file.path(params$root, "qry.fna") %>% ape::read.dna("fasta", as.character = T))
-
-td <- treedater::dater(tre, sts, s)
-treedater::rootToTipRegressionPlot(td)
 ```

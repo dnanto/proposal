@@ -36,6 +36,7 @@ muts <-
 
 call_snp <- function(msa)
 {
+  unq <- apply(msa, 2, unique)
   idx <- which(sapply(unq, function(ele) !("-" %in% ele) && length(unique(ele)) != 1))
   tail(msa[ , idx], -1) %>% 
     as.data.frame() %>% 
@@ -45,9 +46,7 @@ call_snp <- function(msa)
     mutate(ref = msa[1, pos]) %>% 
     filter(ref != alt) %>%
     mutate(mut = str_c(ref, alt)) %>%
-    merge(muts) %>%
-    separate(id, c("accver", "region", "date", "taxid"), sep = "[:\\|]", remove = F) %>%
-    mutate_at("accver", as.factor)
+    merge(muts)
 }
 
 call_ind <- function(msa)
@@ -66,11 +65,10 @@ call_ind <- function(msa)
     setNames(unlist(.[1, ])) %>%
     tail(-1) %>%
     rownames_to_column("id") %>%
-    pivot_longer(-id, names_to = "pos", names_ptypes = list(pos = integer()), values_to = "alt")%>%
+    pivot_longer(-id, names_to = "pos", values_to = "alt") %>%
     merge(filter(., id == id[1]), by = c("pos"), suffixes = c("", ".y")) %>%
     filter(alt != alt.y) %>%
     select(pos, id, alt) %>%
     mutate(call = factor(if_else(str_detect(alt, "-"), "del", "ins"), c("ins", "del"))) %>%
-    separate(id, c("accver", "region", "date", "taxid"), sep = "[:\\|]", remove = F) %>%
-    mutate_at("accver", as.factor)
+    mutate(pos = as.integer(str_remove(pos, "\\..+")))
 }
