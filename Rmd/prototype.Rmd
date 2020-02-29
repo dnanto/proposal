@@ -60,12 +60,14 @@ Perform multiple alignment.
 mafft --auto --adjustdirection --thread -1 "$root/reg.fna" > "$root/msa.fna" 2> "$root/msa.log"
 ```
 
-...
+Visualize SNPs and indels.
 
 ```{r, fig.width=10, fig.height=4}
-msa <- ape::read.dna(file.path(params$root, "msa.fna"), format = "fasta", as.character = T) %>% toupper()
+msa <- 
+  file.path(params$root, "msa.fna") %>%
+  ape::read.dna(format = "fasta", as.character = T) %>% 
+  toupper()
 msa <- msa[2:nrow(msa), ]
-unq <- apply(msa, 2, unique)
 
 df.snp <- call_snp(msa)
 df.ind <- call_ind(msa)
@@ -90,3 +92,24 @@ rm -f "$root/phy."*
 iqtree -s "$root/msa.fna" -pre "$root/phy" -alrt 1000 -bb 1000 -bnni -nt AUTO
 ```
 
+Evaluate clock signal...
+
+```{r}
+tre <-
+  file.path(params$root, "phy.treefile") %>%
+  ape::read.tree()
+
+tre$meta <-
+  enframe(tre$tip.label, name = NULL) %>%
+  separate(value, c("accver", "range", "collection_date", "taxid"), "_", convert = T) %>%
+  mutate_at("collection_date", as.Date)
+
+tre$tip.label <- tre$meta$accver
+
+sts <- with(tre$meta, setNames(as.numeric(collection_date), accver))
+
+s <- ncol(file.path(params$root, "qry.fna") %>% ape::read.dna("fasta", as.character = T))
+
+td <- treedater::dater(tre, sts, s)
+treedater::rootToTipRegressionPlot(td)
+```
