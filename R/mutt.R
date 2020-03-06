@@ -72,3 +72,15 @@ call_ind <- function(msa)
     mutate(call = factor(if_else(str_detect(alt, "-"), "del", "ins"), c("ins", "del"))) %>%
     mutate(pos = as.integer(str_remove(pos, "\\..+")))
 }
+
+parse_outfmt7 <- function(lines)
+{
+  comments <- lines[grep("#", lines)]
+  fields <- 
+    comments[grep("^# Fields: ", comments)] %>% 
+    str_split_fixed(" ", 3) %>% 
+    .[ , 3] %>% 
+    str_split(", ", simplify = T)
+  read_tsv(lines, comment = "#", col_names = fields, col_types = cols(.default = "c"))
+}
+

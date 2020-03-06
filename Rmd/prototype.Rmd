@@ -1,9 +1,10 @@
 ---
 params:
-  root: "../exp/hex"
-  db: "10508"
+  root: "../exp/fib"
+  meta: "../data/10508.tsv"
+  db: "../data/blast/10508/10508"
   entry: "FJ643676"
-  range: "18233-21073"
+  range: "30775-31752"
   pidn: 90
 ---
 
@@ -16,7 +17,7 @@ do.call(Sys.setenv, params)
 
 Local Alignment
 
-```{bash}
+```{bash local}
 mkdir -p "$root"
 blastdbcmd -db "$db" -entry "$entry" -range "$range" > "$root/qry.fna"
 blastn \
@@ -26,38 +27,57 @@ blastn \
 
 Global/Local Alignment
 
-```{bash}
+```{bash glocal}
 awk '/^[^#]/ { print $2; }' "$root/blast.tsv" | uniq > "$root/acc.txt"
 blastdbcmd -db "$db" -entry_batch "$root/acc.txt" > "$root/lib.fna"
-glsearch36 -m 8CB -T 8 "$root/qry.fna" "$root/lib.fna" > "$root/glsearch.tsv"
+time glsearch36 -m 8CB -T 8 "$root/qry.fna" "$root/lib.fna" > "$root/glsearch.tsv"
 ```
 
 Extract
 
-```{bash}
+```{r extract-1}
+df.meta <- read_tsv(params$meta, col_types = cols(.default = "c")) %>% select(accver, taxid, collection_date)
+
+df.glsearch <-
+  file.path(params$root, "glsearch.tsv") %>% 
+  read_lines() %>% 
+  parse_outfmt7() %>%
+  filter(`% identity` >= params$pidn) %>%
+  merge(df.meta, by.x = "subject id", by.y = "accver", all.x = T) %>%
+  filter(!is.na(collection_date))
+
+arrange(df.glsearch, collection_date) %>% 
+  with(str_c(`subject id`, ":", `s. start`, "-", `s. end`)) %>%
+  write_lines(file.path(params$root, "reg.txt"))
+
+with(df.glsearch, 
+  str_c(
+    "/^>/ s/", 
+    `subject id`, ":", `s. start`, "-", `s. end`, "/", 
+    `subject id`, ":", `s. start`, "-", `s. end`, "|", collection_date, "|", taxid, "/"
+  )
+) %>% write_lines(file.path(params$root, "reg.sed"))
+```
+
+```{bash extract-2}
 rm -f "$root/lib.fna.fai"
-awk -v id="$pidn" '/^[^#]/ && $3 >= id { printf "%s:%d-%d\n", $2, $9, $10; }' "$root/glsearch.tsv" | \
-  samtools faidx "$root/lib.fna" -r - > "$root/reg.fna"
+samtools faidx "$root/lib.fna" -r "$root/reg.txt" | sed -E -f "$root/reg.sed" > "$root/reg.fna"
 ```
 
 Multiple Alignment
 
-```{bash}
-mafft --auto --adjustdirection --thread -1 "$root/reg.fna" > "$root/msa.fna" 2> "$root/msa.log"
+```{bash multiple-alignment}
+time mafft --auto --adjustdirection --thread -1 "$root/reg.fna" > "$root/msa.fna" 2> "$root/msa.log"
 ```
 
-MUTT
-
-```{r, fig.width=10, fig.height=4}
+```{r, fig.height=8, fig.width=10}
 msa <- 
   file.path(params$root, "msa.fna") %>%
   ape::read.dna(format = "fasta", as.character = T) %>% 
   toupper()
 msa <- msa[2:nrow(msa), ]
-
 df.snp <- call_snp(msa)
 df.ind <- call_ind(msa)
-
 ggplot() +
   geom_point(data = df.snp, aes(pos, id, shape = call, color = call), size = 8) +
   geom_point(data = df.ind, aes(pos, id, shape = call), size = 4, position = position_nudge(y = 0.25)) +
@@ -68,4 +88,11 @@ ggplot() +
   xlim(1, ncol(msa)) + 
   theme_minimal() + 
   theme(legend.position = "bottom")
+```
+
+Maximum Likelihood Tree
+
+```{bash maximum-likelihood}
+rm -f "$root/phy."*
+time iqtree -s "$root/msa.fna" -pre "$root/phy" -alrt 1000 -bb 1000 -bnni -nt AUTO > /dev/null
 ```
