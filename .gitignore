@@ -1,0 +1,5 @@
+.Rhistory
+.snakemake
+.vscode
+env
+exp
