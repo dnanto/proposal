@@ -2,4 +2,6 @@
 .snakemake
 .vscode
 env
-exp
+data
+dag.*
+out

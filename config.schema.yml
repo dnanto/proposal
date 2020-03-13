@@ -1,0 +1,27 @@
+$schema: "http://json-schema.org/draft-06/schema#"
+
+description: parameters
+
+properties:
+  out:
+    type: string
+    description: the ouput directory
+    default: out
+  qry:
+    type: string
+    description: the query FASTA file
+  bdb:
+    type: string
+    description: the blast database
+  idn:
+    type: number
+    description: the percentage identity threshold value in [0, 100], keep alignments >= value
+    default: 90
+  cov:
+    type: number
+    description: the query coverage percentage threshold value in [0, 100], keep alignments >= value
+    default: 90
+
+required:
+  - qry
+  - bdb

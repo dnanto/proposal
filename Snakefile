@@ -1,18 +1,27 @@
 from pathlib import Path
 from csv import DictReader
 from operator import itemgetter
-from collections import OrderedDict
+from snakemake.utils import validate
+
+# config
+
+configfile: "config.yml"
+validate(config, "config.schema.yml")
+
+# setup
 
 path = Path(config["qry"])
-root = Path(config["out"]) / Path(path.stem)
+root = Path(config["out"]) / path.stem
 
 def parse_outfmt7(file):
-	fields = []
-	for line in map(str.strip, file):
-		if line.startswith("# Fields: "):
-			fields = line[10:].split(", ")
-		elif line and not line.startswith("#"):
-			yield OrderedDict(zip(fields, line.split("\t")))
+    fields = []
+    for line in map(str.strip, file):
+        if line.startswith("# Fields: "):
+            fields = line[10:].split(", ")
+        elif line and not line.startswith("#"):
+            yield dict(zip(fields, line.split("\t")))
+
+# rules
 
 rule all:
     input:
@@ -32,9 +41,11 @@ rule local:
     output:
         root / "lcl.tsv"
     params:
-        config["db"]
+        bdb=config["bdb"],
+        idn=config["idn"],
+        cov=config["cov"]
     shell:    
-        'blastn -task blastn -num_threads 8 -max_target_seqs 20000 -db "{params[0]}" -query "{input}" -out "{output}" -outfmt 7;'
+        'blastn -task blastn -num_threads 8 -max_target_seqs 20000 -perc_identity "{params.idn}" -qcov_hsp_perc "{params.cov}" -db "{params.bdb}" -query "{input}" -out "{output}" -outfmt 7;'
 
 rule entry:
     input:
@@ -42,7 +53,7 @@ rule entry:
     output:
         root / "lib.fna"
     params:
-        config["db"]
+        config["bdb"]
     shell:
         """awk '/^[^#]/ {{ print $2; }}' {input} | uniq | blastdbcmd -db "{params}" -entry_batch - > "{output}";"""
 
@@ -63,9 +74,9 @@ rule feature:
         root / "src.json"
     params:
         pfx=root / "src",
-        pct=config["pct"]
+        idn=config["idn"]
     shell:
-        """awk -v pct="{params.pct}" '/^[^#]/ && $3 >= $pct {{ print $2; }}' "{input}" | ./sh/feature.sh "{params.pfx}";"""
+        """awk -v idn="{params.idn}" '/^[^#]/ && $3 >= idn {{ print $2; }}' "{input}" | ./sh/feature.sh "{params.pfx}";"""
 
 rule region:
     input:
@@ -79,7 +90,7 @@ rule region:
         with open(input[0]) as file:
             getter = itemgetter("accver", "collection_date", "taxid")
             reader = DictReader(file, delimiter="\t")
-            meta = { ele[0]: "|".join(ele[1:]) for ele in map(getter, reader) if ele[1] != "NA" }
+            meta = { ele[0]: ele[1:] for ele in map(getter, reader) if ele[1] != "NA" }
         # keep accessions with collection_date
         data = {}
         with open(input[1]) as file:
@@ -89,10 +100,10 @@ rule region:
                     data[key] = data.get(key, row)
         # output region and sed files
         with open(output[0], "w") as file1, open(output[1], "w") as file2:
-            for key, val in data.items():
+            for key, val in sorted(data.items(), key=lambda item: meta[item[0]][0]):
                 reg = f"{val['subject id']}:{val['s. start']}-{val['s. end']}"
                 print(reg, file=file1)
-                print(f"/^>/ s/{reg}/{reg}|{meta[key]}/g", file=file2)
+                print(f"/^>/ s/{reg}/{reg}|{'|'.join(meta[key])}/g", file=file2)
 
 rule extract:
     input:
@@ -121,4 +132,4 @@ rule phyloml:
     params:
         root / "phy"
     shell:
-        """iqtree -s "{input}" -pre "{params}" -alrt 1000 -bb 1000 -bnni -nt AUTO > /dev/null;"""
+        """rm -f "{params}."* && iqtree -s "{input}" -pre "{params}" -alrt 1000 -bb 1000 -bnni -nt AUTO > /dev/null;"""
