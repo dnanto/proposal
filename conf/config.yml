@@ -3,3 +3,4 @@ qry: data/FJ643676.1/ACU57037.fna
 bdb: data/blast/10508/10508
 idn: 90
 cov: 90
+thr: 8

@@ -21,6 +21,10 @@ properties:
     type: number
     description: the query coverage percentage threshold value in [0, 100], keep alignments >= value
     default: 90
+  thr:
+    type: number
+    description: the number of threads to use
+    default: 8
 
 required:
   - qry

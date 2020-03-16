@@ -5,8 +5,8 @@ from snakemake.utils import validate
 
 # config
 
-configfile: "config.yml"
-validate(config, "config.schema.yml")
+configfile: Path("conf") / "config.yml"
+validate(config, Path("conf") / "schema.yml")
 
 # setup
 
@@ -43,9 +43,10 @@ rule local:
     params:
         bdb=config["bdb"],
         idn=config["idn"],
-        cov=config["cov"]
+        cov=config["cov"],
+        thr=config["thr"]
     shell:    
-        'blastn -task blastn -num_threads 8 -max_target_seqs 20000 -perc_identity "{params.idn}" -qcov_hsp_perc "{params.cov}" -db "{params.bdb}" -query "{input}" -out "{output}" -outfmt 7;'
+        'blastn -task blastn -num_threads "{params.thr}" -max_target_seqs 20000 -perc_identity "{params.idn}" -qcov_hsp_perc "{params.cov}" -db "{params.bdb}" -query "{input}" -out "{output}" -outfmt 7;'
 
 rule entry:
     input:
@@ -63,8 +64,10 @@ rule glocal:
         root / "lib.fna"
     output:
         root / "glb.tsv"
+    params:
+        config["thr"]
     shell:
-        'glsearch36 -m 8CB -T 8 "{input[0]}" "{input[1]}" > "{output}";'
+        'glsearch36 -m 8CB -T "{params[0]}" "{input[0]}" "{input[1]}" > "{output}";'
 
 rule feature:
     input:
@@ -120,9 +123,11 @@ rule msa:
         root / "reg.fna"
     output:
         root / "msa.fna",
-        root / "msa.log"
+        root / "msa.log",
+    params:
+        config["thr"]
     shell:
-        """mafft --auto --adjustdirection --thread -1 "{input}" > "{output[0]}" 2> "{output[1]}";"""
+        """mafft --auto --adjustdirection --thread "{params[0]}" "{input}" > "{output[0]}" 2> "{output[1]}";"""
 
 rule phyloml:
     input:
@@ -130,6 +135,7 @@ rule phyloml:
     output:
         root / "phy.treefile"
     params:
-        root / "phy"
+        pre=root / "phy",
+        thr=config["thr"]
     shell:
-        """rm -f "{params}."* && iqtree -s "{input}" -pre "{params}" -alrt 1000 -bb 1000 -bnni -nt AUTO > /dev/null;"""
+        """rm -f "{params.pre}."* && iqtree -s "{input}" -pre "{params.pre}" -alrt 1000 -bb 1000 -bnni -nt "{params.thr}" > /dev/null;"""
