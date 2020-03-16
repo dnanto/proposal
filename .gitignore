@@ -1,4 +1,5 @@
 .Rhistory
+.Rlib
 .snakemake
 .vscode
 env
