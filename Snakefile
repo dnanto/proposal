@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 from csv import DictReader
 from operator import itemgetter
@@ -6,7 +5,6 @@ from snakemake.utils import validate
 
 # config
 
-os.environ["R_LIBS"] = ".Rlib"
 configfile: Path("conf") / "config.yml"
 validate(config, Path("conf") / "schema.yml")
 
