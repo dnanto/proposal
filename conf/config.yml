@@ -4,3 +4,6 @@ bdb: data/blast/10508/10508
 idn: 95
 cov: 95
 thr: 8
+chain_length: 100000000
+sub_chain_length: 5000
+particle_count: 3

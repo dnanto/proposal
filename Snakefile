@@ -21,11 +21,23 @@ def parse_outfmt7(file):
         elif line and not line.startswith("#"):
             yield dict(zip(fields, line.split("\t")))
 
+beautify_output = [
+    root / "beast" / "cal.tsv",
+    root / "beast" / "rln.ccp.mle.xml",
+    root / "beast" / "rln.ccp.run.xml",
+    root / "beast" / "rln.cep.mle.xml",
+    root / "beast" / "rln.cep.run.xml",
+    root / "beast" / "str.ccp.mle.xml",
+    root / "beast" / "str.ccp.run.xml",
+    root / "beast" / "str.cep.mle.xml",
+    root / "beast" / "str.cep.run.xml"
+]
+
 # rules
 
 rule all:
     input:
-        root / "phy.treefile"
+        beautify_output
 
 rule query:
     input:
@@ -133,9 +145,18 @@ rule phyloml:
     input:
         root / "msa.fna"
     output:
-        root / "phy.treefile"
+        root / "phy" / "phy.log"
     params:
-        pre=root / "phy",
+        pre=root / "phy" / "phy",
         thr=config["thr"]
     shell:
         """rm -f "{params.pre}."* && iqtree -s "{input}" -pre "{params.pre}" -alrt 1000 -bb 1000 -bnni -nt "{params.thr}" > /dev/null;"""
+
+rule beautify:
+    input:
+        root / "msa.fna",
+        root / "phy" / "phy.log"
+    output:
+        beautify_output
+    script:
+        "./R/beautify.R"

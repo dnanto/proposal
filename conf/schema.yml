@@ -22,9 +22,21 @@ properties:
     description: the query coverage percentage threshold value in [0, 100], keep alignments >= value
     default: 90
   thr:
-    type: number
+    type: integer
     description: the number of threads to use
     default: 8
+  chain_length:
+    type: integer
+    description: the length of the MCMC chain i.e. number of samples taken in main loop
+    default: 100000000
+  sub_chain_length:
+    type: integer
+    description: the defines the number of MCMC steps to generate a new point from the prior with the likelihood restriction at each iteration
+    default: 5000
+  particle_count:
+    type: integer
+    description: the active points define the number of particles kept in the parameter space exploration at each iteration
+    default: 3
 
 required:
   - qry
