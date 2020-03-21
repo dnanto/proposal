@@ -1,9 +1,20 @@
 out: out
 qry: data/FJ643676.1/ACU57037.fna
-bdb: data/blast/10508/10508
-idn: 95
-cov: 95
-thr: 8
-chain_length: 100000000
-sub_chain_length: 5000
-particle_count: 3
+cpu: 8
+align:
+  task: blastn
+  db: data/blast/10508/10508
+  perc_identity: 95
+  qcov_hsp_perc: 95
+  qcov_identity: 95
+  max_target_seqs: 20000
+entrez:
+  email: ""
+  db: nuccore
+  post_size: 500
+dates:
+  formats:
+    - "%d-%b-%Y"
+    - "%Y-%m-%d"
+    - "%b-%Y"
+    - "%Y"

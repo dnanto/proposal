@@ -1,0 +1,4 @@
+dependencies:
+  - bioconda::blast=2.9.0
+  - biobuilds::fasta=36.3.8e
+  - conda-forge::biopython

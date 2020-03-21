@@ -36,7 +36,7 @@ dir.create(out, showWarnings = F, recursive = T)
 
 mcmc <- create_mcmc(
   chain_length = as.integer(params$chain_length),
-  n_init_attempts = 100
+  n_init_attempts = 10000
 )
 
 path_cal <- file.path(out, "cal.tsv")
@@ -52,7 +52,8 @@ write_tsv(
 paths <-
   expand.grid(names(clock_models), names(tree_priors)) %>%
   apply(1, function(row) {
-    output <- file.path(out, str_c(row[1], row[2], "run", "xml", sep = "."))
+    output <- file.path(out, str_c(row[1], row[2], sep = "-"), str_c("run", "xml", sep = "."))
+    dir.create(dirname(output), showWarnings = F, recursive = T)
     create_beast2_input_file(
       file.path(params$root, "msa.fna"),
       output,
@@ -82,6 +83,8 @@ for (path in paths)
   lines <- read_lines(path)
   # BEAST2 doesn't like this line and not sure why it's there...
   lines <- lines[grep('<taxonset idref="TaxonSet.G_VII_pre2003_msa"/>', lines, invert = T)]
+  idx <- grep('<logger id="screenlog" logEvery="1000">', lines)
+  lines[idx] <- str_replace(lines[idx], "1000", "100000")
   write_lines(lines, path)
   lines[grep("^<run", lines)] <- run_mle
   write_lines(lines, str_replace_all(path, "run", "mle"))

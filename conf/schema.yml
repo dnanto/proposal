@@ -10,34 +10,55 @@ properties:
   qry:
     type: string
     description: the query FASTA file
-  bdb:
-    type: string
-    description: the blast database
-  idn:
-    type: number
-    description: the percentage identity threshold value in [0, 100], keep alignments >= value
-    default: 90
-  cov:
-    type: number
-    description: the query coverage percentage threshold value in [0, 100], keep alignments >= value
-    default: 90
-  thr:
+  cpu:
     type: integer
-    description: the number of threads to use
+    description: the number of CPUs to use
     default: 8
-  chain_length:
-    type: integer
-    description: the length of the MCMC chain i.e. number of samples taken in main loop
-    default: 100000000
-  sub_chain_length:
-    type: integer
-    description: the defines the number of MCMC steps to generate a new point from the prior with the likelihood restriction at each iteration
-    default: 5000
-  particle_count:
-    type: integer
-    description: the active points define the number of particles kept in the parameter space exploration at each iteration
-    default: 3
+  align:
+    task:
+      type: string
+      description: "the task to execute: blastn, blastn-short, dc-megablast, megablast, rmblastn"
+      default: blastn
+    db:
+      type: string
+      description: the BLAST database name
+    perc_identity:
+      type: number
+      description: the percent identity in [0, 100]
+      default: 95
+    qcov_hsp_perc:
+      type: number
+      description: the percent query coverage per hsp in [0, 100]
+      default: 95
+    qcov_per_iden:
+      type: number
+      description: the percent query coverage identity [0, 100]
+      default: 95
+    max_target_seqs:
+      type: string
+      description: the maximum number of aligned sequences to keep
+      default: 20000
+  entrez:
+    email:
+      type: string
+      description: the e-mail to identify yourself to NCBI (for politeness reasons)
+    db:
+      type: string
+      description: the NCBI database
+      default: nuccore
+    post_size:
+      type: integer
+      description: the number of records to post at a time
+      default: 500
+  dates:
+    formats:
+      type: stringArray
+      description: the order of date formats to try and parse
+      default:
+        - "%d-%b-%Y"
+        - "%Y-%m-%d"
+        - "%b-%Y"
+        - "%Y"
 
 required:
   - qry
-  - bdb
