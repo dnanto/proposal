@@ -100,9 +100,8 @@ rule extract:
     # output extract
     with open(output[0], "w") as file:
       for key, val in sorted(data.items(), key=lambda item: meta[item[0]][0]):
-        start, end = val['s. start'], val['s. end']
-        #TODO: extract region...
-        rec = idx[key]
+        start, end = int(val['s. start']), int(val['s. end'])
+        rec = idx[key][start-1:end]
         rec.id = f"{val['subject id']}:{start}-{end}|{'|'.join(meta[key])}"
         rec.description = ""
         SeqIO.write(rec, file, "fasta")
