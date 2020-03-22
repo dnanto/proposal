@@ -10,8 +10,7 @@ dissertation
 # export TMPDIR="$(pwd)/.tmp"
 conda update -y -n base -c defaults conda
 conda config --set env_prompt '({name}) '
-conda install -c bioconda snakemake-minimal 
-conda activate ./env
+conda install -c bioconda snakemake-minimal
 
 # example data & run...
 mkdir -p data && efetch -id FJ643676.1 -db nuccore -format gb -mode text > data/FJ643676.1.gbk
