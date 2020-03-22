@@ -38,7 +38,8 @@ rule beastify:
     """
       line=( $(
         grep -v WARNING {input[1]:q} | \
-          awk '{{$1=$1}}; 261 >= NR && NR >= 130' | \
+          awk '{{$1=$1}}; f;/No./{{f=1}}' | \
+          awk 'NR <= 132' | \
           grep -v "+R" | \
           sort -n -k 7 | \
           head -n 1 | \
@@ -53,6 +54,6 @@ rule beastify:
           -len_mcmc {params.len_mcmc:q} -len_psss {params.len_psss:q} \
           -echo_mcmc {params.echo_mcmc:q} -echo_psss {params.echo_psss:q} \
           -path_steps {params.path_steps:q} \
-          {input[0]:q} ./templates "${{line[1]}}" ${{model[0]}} ${{model[1]}} > $ele;
+          {input[0]:q} ./templates "${{line[1]}}" "${{model[0]}}" "${{model[1]}}" > $ele;
       done;
     """
