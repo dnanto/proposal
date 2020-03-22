@@ -1,3 +1,5 @@
 dependencies:
   - bioconda::mafft=7.455
   - bioconda::iqtree=1.6.12
+  - conda-forge::lxml
+  - anaconda::beautifulsoup4

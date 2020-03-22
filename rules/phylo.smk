@@ -32,6 +32,8 @@ rule beastify:
     target
   params:
     **config["beast"]
+  conda:
+    "../envs/phylo.yml"
   shell:
     """
       line=( $(
