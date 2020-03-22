@@ -7,7 +7,7 @@ rule msa:
   params:
     config["cpu"]
   conda:
-    "../envs/phylo.yml"
+    "../envs/bio.yml"
   shell:
     """mafft --auto --adjustdirection --thread {params[0]:q} {input:q} > {output[0]:q} 2> {output[1]:q};"""
 
@@ -20,7 +20,7 @@ rule phy:
     root / "phy" / "run",
     config["cpu"]
   conda:
-    "../envs/phylo.yml"
+    "../envs/bio.yml"
   shell:
     """rm -f {params[0]:q}.* && iqtree -s {input:q} -pre {params[0]:q} -alrt 1000 -bb 1000 -bnni -nt {params[1]:q} > /dev/null;"""
 
@@ -33,7 +33,7 @@ rule beastify:
   params:
     **config["beast"]
   conda:
-    "../envs/phylo.yml"
+    "../envs/bio.yml"
   shell:
     """
       line=( $(

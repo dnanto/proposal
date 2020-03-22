@@ -15,7 +15,7 @@ rule local:
     **config["align"],
     num_threads = config["cpu"]
   conda:
-    "../envs/extract.yml"
+    "../envs/bio.yml"
   shell:    
     """
     blastn \
@@ -33,7 +33,7 @@ rule entry:
     params:
         config["align"]["db"]
     conda:
-      "../envs/extract.yml"
+      "../envs/bio.yml"
     shell:
         """awk '/^[^#]/ {{ print $2; }}' {input:q} | uniq | blastdbcmd -db {params:q} -entry_batch - > {output:q};"""
 
@@ -46,7 +46,7 @@ rule glocal:
     params:
       config["cpu"]
     conda:
-      "../envs/extract.yml"
+      "../envs/bio.yml"
     shell:
       'glsearch36 -m 8CB -T {params[0]:q} {input[0]:q} {input[1]:q} > {output:q};'
 
