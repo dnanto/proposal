@@ -46,7 +46,7 @@ rule beastify:
       ) );
       echo ${{line[1]}};
       for ele in {output}; do
-        model=( $(basename "$ele" | tr '[-.]' ' ') );
+        model=( $(basename "$ele" | tr '[\-.]' ' ') );
         mkdir -p "$(dirname $ele)";
         ./scripts/beautify.py \
           -stem "${{ele/.xml/}}" \
