@@ -1,6 +1,8 @@
 dependencies:
   - bioconda::blast=2.9.0
   - biobuilds::fasta=36.3.8e
-  - conda-forge::biopython
-  - conda-forge::lxml
+  - bioconda::mafft=7.455
+  - bioconda::iqtree=1.6.12
   - anaconda::beautifulsoup4
+  - conda-forge::lxml
+  - conda-forge::biopython
