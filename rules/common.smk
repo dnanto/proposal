@@ -17,7 +17,7 @@ validate(config, "../conf/schema.yml")
 ## variables ##
 
 root = Path(config["out"]) / Path(config["qry"]).stem
-target = (root / "reg.fna", root / "phy" / "phy.log")
+target = (root / "reg.fna", root / "phy" / "run.log")
 
 ## functions ##
 

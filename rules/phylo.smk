@@ -15,9 +15,9 @@ rule phy:
     input:
         root / "msa.fna"
     output:
-        root / "phy" / "phy.log"
+        root / "phy" / "run.log"
     params:
-        root / "phy" / "phy",
+        root / "phy" / "run",
         config["cpu"]
     conda:
       "../envs/phylo.yml"
