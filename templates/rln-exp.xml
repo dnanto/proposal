@@ -108,7 +108,7 @@
 	<treeDataLikelihood id="treeLikelihood" useAmbiguities="false">
 		<partition>
 			<patterns idref="patterns"/>
-			<siteModel idref="siteModel"/>
+			<siteModel idref="sitemodel"/>
 		</partition>
 		<treeModel idref="treeModel"/>
 		<discretizedBranchRates idref="branchRates"/>

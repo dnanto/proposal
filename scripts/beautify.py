@@ -48,42 +48,42 @@ def taxa_tags(soup, path, dregex="(%Y-%m-%d)", dformat="%Y-%m-%d"):
     
     return tag_tax, tag_aln
 
-def gammaize(soup, model):
-    soup.beast.siteModel.append(BeautifulSoup(f"""
+def gammaize(soup):
+    soup.beast.siteModel.append(BeautifulSoup("""
         <gammaShape gammaCategories="4">
-            <parameter id="siteModel_{model}.alpha" value="0.5" lower="0.0"/>
+            <parameter id="sitemodel.alpha" value="0.5" lower="0.0"/>
         </gammaShape>
     """, "lxml-xml"))
-    soup.beast.operators.append(BeautifulSoup(f"""
+    soup.beast.operators.append(BeautifulSoup("""
         <scaleOperator scaleFactor="0.75" weight="0.1">
-            <parameter idref="siteModel_{model}.alpha"/>
+            <parameter idref="sitemodel.alpha"/>
         </scaleOperator>
     """, "lxml-xml"))
-    soup.beast.mcmc.joint.prior.append(BeautifulSoup(f"""
+    soup.beast.mcmc.joint.prior.append(BeautifulSoup("""
         <exponentialPrior mean="0.5" offset="0.0">
-            <parameter idref="siteModel_{model}.alpha"/>
+            <parameter idref="sitemodel.alpha"/>
         </exponentialPrior>
     """, "lxml-xml"))
-    soup.select_one("#fileLog").append(soup.new_tag("parameter", idref=f"siteModel_{model}.alpha"))
+    soup.select_one("#fileLog").append(soup.new_tag("parameter", idref="sitemodel.alpha"))
 
 
-def invariantize(soup, model):
-    soup.beast.siteModel.append(BeautifulSoup(f"""
+def invariantize(soup):
+    soup.beast.siteModel.append(BeautifulSoup("""
         <proportionInvariant>
-            <parameter id="siteModel_{model}.pInv" value="0.5" lower="0.0" upper="1.0"/>
+            <parameter id="sitemodel.pInv" value="0.5" lower="0.0" upper="1.0"/>
         </proportionInvariant>
     """, "lxml-xml"))
-    soup.beast.operators.append(BeautifulSoup(f"""
+    soup.beast.operators.append(BeautifulSoup("""
 		<randomWalkOperator windowSize="0.75" weight="1" boundaryCondition="logit">
-			<parameter idref="siteModel_{model}.pInv"/>
+			<parameter idref="sitemodel.pInv"/>
 		</randomWalkOperator>
     """, "lxml-xml"))
-    soup.beast.mcmc.joint.prior.append(BeautifulSoup(f"""
+    soup.beast.mcmc.joint.prior.append(BeautifulSoup("""
         <uniformPrior lower="0.0" upper="1.0">
-            <parameter idref="siteModel_{model}.pInv"/>
+            <parameter idref="sitemodel.pInv"/>
         </uniformPrior>
     """, "lxml-xml"))
-    soup.select_one("#fileLog").append(soup.new_tag("parameter", idref=f"siteModel_{model}.pInv"))
+    soup.select_one("#fileLog").append(soup.new_tag("parameter", idref="sitemodel.pInv"))
 
 def parse_args(argv):
     parser = ArgumentParser(
@@ -106,8 +106,8 @@ def main(argv):
     
     with args.tdir.joinpath("model.xml").open() as file:
         model = BeautifulSoup(file, "xml").find("model", id=args.model)
-        sub_model = model.select_one(f"#subModel_{args.model}")
-        site_model = model.select_one("siteModel")
+        sub_model = model.select_one("subModel")
+        site_model = model.select_one("#sitemodel")
         operators = model.select_one("operators")
         prior = model.select_one("prior")
         log = model.select_one("log")
@@ -126,11 +126,10 @@ def main(argv):
             soup.beast.mcmc.joint.prior.append(ele)
         for ele in list(log.children):
             soup.select_one("#fileLog").append(ele)
-        soup.treeDataLikelihood.partition.siteModel["idref"] += "_" + args.model
         if args.gamma:
-            gammaize(soup, args.model)
+            gammaize(soup)
         if args.invariant:
-            invariantize(soup, args.model)
+            invariantize(soup)
 
     print(soup)
 
