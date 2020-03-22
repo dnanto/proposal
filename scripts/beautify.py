@@ -48,6 +48,43 @@ def taxa_tags(soup, path, dregex="(%Y-%m-%d)", dformat="%Y-%m-%d"):
     
     return tag_tax, tag_aln
 
+def gammaize(soup, model):
+    soup.beast.siteModel.append(BeautifulSoup(f"""
+        <gammaShape gammaCategories="4">
+            <parameter id="siteModel_{model}.alpha" value="0.5" lower="0.0"/>
+        </gammaShape>
+    """, "lxml-xml"))
+    soup.beast.operators.append(BeautifulSoup(f"""
+        <scaleOperator scaleFactor="0.75" weight="0.1">
+            <parameter idref="siteModel_{model}.alpha"/>
+        </scaleOperator>
+    """, "lxml-xml"))
+    soup.beast.mcmc.joint.prior.append(BeautifulSoup(f"""
+        <exponentialPrior mean="0.5" offset="0.0">
+            <parameter idref="siteModel_{model}.alpha"/>
+        </exponentialPrior>
+    """, "lxml-xml"))
+    soup.select_one("#fileLog").append(soup.new_tag("parameter", idref=f"siteModel_{model}.alpha"))
+
+
+def invariantize(soup, model):
+    soup.beast.siteModel.append(BeautifulSoup(f"""
+        <proportionInvariant>
+            <parameter id="siteModel_{model}.pInv" value="0.5" lower="0.0" upper="1.0"/>
+        </proportionInvariant>
+    """, "lxml-xml"))
+    soup.beast.operators.append(BeautifulSoup(f"""
+		<randomWalkOperator windowSize="0.75" weight="1" boundaryCondition="logit">
+			<parameter idref="siteModel_{model}.pInv"/>
+		</randomWalkOperator>
+    """, "lxml-xml"))
+    soup.beast.mcmc.joint.prior.append(BeautifulSoup(f"""
+        <uniformPrior lower="0.0" upper="1.0">
+            <parameter idref="siteModel_{model}.pInv"/>
+        </uniformPrior>
+    """, "lxml-xml"))
+    soup.select_one("#fileLog").append(soup.new_tag("parameter", idref=f"siteModel_{model}.pInv"))
+
 def parse_args(argv):
     parser = ArgumentParser(
         description="generate a BEAST input file based on an xml template...",
@@ -60,6 +97,8 @@ def parse_args(argv):
     parser.add_argument("coalescent", help="the coalescent model")
     parser.add_argument("-dregex", help="the regular expression to extract the tip dates", default="(\d{4}-\d{2}-\d{2})")
     parser.add_argument("-dformat", help="the date format for tip dates", default="%Y-%m-%d")
+    parser.add_argument("-gamma", action="store_true", help="the flag for site rate heterogeneity model")
+    parser.add_argument("-invariant", action="store_true", help="the flag for invariant site model")
     return parser.parse_args(argv)
 
 def main(argv):
@@ -72,7 +111,7 @@ def main(argv):
         operators = model.select_one("operators")
         prior = model.select_one("prior")
         log = model.select_one("log")
-        
+    
     # print(args.tdir.joinpath(f"{args.clock}-{args.coalescent}.xml"))
     with args.tdir.joinpath(f"{args.clock}-{args.coalescent}.xml").open() as file:
         soup = BeautifulSoup(file, "xml")
@@ -81,13 +120,17 @@ def main(argv):
         soup.beast.insert(1, tag_aln)
         soup.beast.insert(2, sub_model)
         soup.beast.insert(3, site_model)
-        for ele in operators:
+        for ele in list(operators.children):
             soup.beast.operators.append(ele)
-        for ele in prior:
+        for ele in list(prior.children):
             soup.beast.mcmc.joint.prior.append(ele)
-        for ele in log:
-            soup.beast.log.append(ele)
+        for ele in list(log.children):
+            soup.select_one("#fileLog").append(ele)
         soup.treeDataLikelihood.partition.siteModel["idref"] += "_" + args.model
+        if args.gamma:
+            gammaize(soup, args.model)
+        if args.invariant:
+            invariantize(soup, args.model)
 
     print(soup)
 

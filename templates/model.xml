@@ -39,24 +39,7 @@
             <relativeRate>
                 <parameter id="siteModel_JC.mu" value="1.0" lower="0.0"/>
             </relativeRate>
-            <gammaShape gammaCategories="4">
-                <parameter id="siteModel_JC.alpha" value="0.5" lower="0.0"/>
-            </gammaShape>
         </siteModel>
-        <!-- *** DEFINE OPERATORS *** -->
-        <operators id="operators" optimizationSchedule="default">
-            <scaleOperator scaleFactor="0.75" weight="0.1">
-                <parameter idref="siteModel_JC.alpha"/>
-            </scaleOperator>
-        </operators>
-        <prior id="prior">
-            <exponentialPrior mean="0.5" offset="0.0">
-                <parameter idref="siteModel_JC.alpha"/>
-            </exponentialPrior>
-        </prior>
-        <log>
-            <parameter idref="siteModel_JC.alpha"/>
-        </log>
     </model>
     <model id="F81">
         <!-- *** SUBSTITUTION MODEL FOR PARTITION Gene2 *** -->
@@ -95,81 +78,61 @@
             <relativeRate>
                 <parameter id="siteModel_F81.mu" value="1.0" lower="0.0"/>
             </relativeRate>
-            <gammaShape gammaCategories="4">
-                <parameter id="siteModel_F81.alpha" value="0.5" lower="0.0"/>
-            </gammaShape>
         </siteModel>
         <!-- *** DEFINE OPERATORS *** -->
         <operators id="operators" optimizationSchedule="default">
             <deltaExchange delta="0.01" weight="0.1">
                 <parameter idref="subModel_F81.frequencies"/>
             </deltaExchange>
-            <scaleOperator scaleFactor="0.75" weight="0.1">
-                <parameter idref="siteModel_F81.alpha"/>
-            </scaleOperator>
         </operators>
         <prior id="prior">
             <uniformPrior lower="0.0" upper="1.0">
                 <parameter idref="subModel_F81.frequencies"/>
             </uniformPrior>
-            <exponentialPrior mean="0.5" offset="0.0">
-                <parameter idref="siteModel_JC.alpha"/>
-            </exponentialPrior>
         </prior>
         <log>
             <parameter idref="subModel_F81.frequencies"/>
-            <parameter idref="siteModel_F81.alpha"/>
         </log>
     </model>
     <model id="K2P">
         <!-- *** SUBSTITUTION MODEL FOR PARTITION Gene3 *** -->
         <!-- The K80 substitution model (Kimura, 1980) -->
         <subModel>
-            <hkyModel id="subModel_K80">
+            <hkyModel id="subModel_K2P">
                 <frequencies>
                     <frequencyModel dataType="nucleotide">
                         <frequencies>
-                            <parameter id="subModel_K80.frequencies" value="0.25 0.25 0.25 0.25"/>
+                            <parameter id="subModel_K2P.frequencies" value="0.25 0.25 0.25 0.25"/>
                         </frequencies>
                     </frequencyModel>
                 </frequencies>
                 <kappa>
-                    <parameter id="subModel_K80.kappa" value="1.0" lower="0.0"/>
+                    <parameter id="subModel_K2P.kappa" value="1.0" lower="0.0"/>
                 </kappa>
             </hkyModel>
         </subModel>
         <!-- *** SITE MODEL FOR PARTITION Gene3 *** -->
-        <siteModel id="siteModel_K80">
+        <siteModel id="siteModel_K2P">
             <substitutionModel>
-                <hkyModel idref="subModel_K80"/>
+                <hkyModel idref="subModel_K2P"/>
             </substitutionModel>
             <relativeRate>
-                <parameter id="siteModel_K80.mu" value="1.0" lower="0.0" upper="10000.0"/>
+                <parameter id="siteModel_K2P.mu" value="1.0" lower="0.0"/>
             </relativeRate>
-            <gammaShape gammaCategories="4">
-                <parameter id="siteModel_K80.alpha" value="0.5" lower="0.0" upper="1000.0"/>
-            </gammaShape>
         </siteModel>
         <operators id="operators" optimizationSchedule="default">
             <scaleOperator scaleFactor="0.75" weight="0.1">
-                <parameter idref="subModel_K80.kappa"/>
-            </scaleOperator>
-            <scaleOperator scaleFactor="0.75" weight="0.1">
-                <parameter idref="siteModel_K80.alpha"/>
+                <parameter idref="subModel_K2P.kappa"/>
             </scaleOperator>
         </operators>
         <prior id="prior">
             <logNormalPrior mean="1.0" stdev="1.25" offset="0.0" meanInRealSpace="false">
-                <parameter idref="subModel_K80.kappa"/>
+                <parameter idref="subModel_K2P.kappa"/>
             </logNormalPrior>
-            <exponentialPrior mean="0.5" offset="0.0">
-                <parameter idref="siteModel_JC.alpha"/>
-            </exponentialPrior>
         </prior>
         <log>
-            <parameter idref="subModel_K80.kappa"/>
-            <parameter idref="subModel_K80.frequencies"/>
-            <parameter idref="siteModel_K80.alpha"/>
+            <parameter idref="subModel_K2P.kappa"/>
+            <parameter idref="subModel_K2P.frequencies"/>
         </log>
     </model>
     <model id="HKY">
@@ -197,9 +160,6 @@
             <relativeRate>
                 <parameter id="siteModel_HKY.mu" value="1.0" lower="0.0"/>
             </relativeRate>
-            <gammaShape gammaCategories="4">
-                <parameter id="siteModel_HKY.alpha" value="0.5" lower="0.0"/>
-            </gammaShape>
         </siteModel>
         <operators id="operators" optimizationSchedule="default">
             <scaleOperator scaleFactor="0.75" weight="0.1">
@@ -208,9 +168,6 @@
             <deltaExchange delta="0.01" weight="0.1">
                 <parameter idref="subModel_HKY.frequencies"/>
             </deltaExchange>
-            <scaleOperator scaleFactor="0.75" weight="0.1">
-                <parameter idref="siteModel_HKY.alpha"/>
-            </scaleOperator>
         </operators>
         <prior id="prior">
             <logNormalPrior mean="1.0" stdev="1.25" offset="0.0" meanInRealSpace="false">
@@ -219,14 +176,10 @@
             <uniformPrior lower="0.0" upper="1.0">
                 <parameter idref="subModel_HKY.frequencies"/>
             </uniformPrior>
-            <exponentialPrior mean="0.5" offset="0.0">
-                <parameter idref="siteModel_HKY.alpha"/>
-            </exponentialPrior>
         </prior>
         <log>
             <parameter idref="subModel_HKY.kappa"/>
             <parameter idref="subModel_HKY.frequencies"/>
-            <parameter idref="siteModel_HKY.alpha"/>
         </log>
     </model>
     <model id="TNe">
@@ -266,9 +219,6 @@
             <relativeRate>
                 <parameter id="siteModel_TNe.mu" value="1.0" lower="0.0"/>
             </relativeRate>
-            <gammaShape gammaCategories="4">
-                <parameter id="siteModel_TNe.alpha" value="0.5" lower="0.0"/>
-            </gammaShape>
         </siteModel>
         <operators id="operators" optimizationSchedule="default">
             <scaleOperator scaleFactor="0.75" weight="0.1">
@@ -278,7 +228,6 @@
                 <parameter idref="subModel_TNe.ag"/>
             </scaleOperator>
             <scaleOperator scaleFactor="0.75" weight="0.1">
-                <parameter idref="siteModel_TNe.alpha"/>
             </scaleOperator>
         </operators>
         <prior id="prior">
@@ -288,15 +237,11 @@
             <gammaPrior shape="0.05" scale="10.0" offset="0.0">
                 <parameter idref="subModel_TNe.ag"/>
             </gammaPrior>
-            <exponentialPrior mean="0.5" offset="0.0">
-                <parameter idref="siteModel_TNe.alpha"/>
-            </exponentialPrior>
         </prior>
         <log>
             <parameter idref="subModel_TNe.transversion"/>
             <parameter idref="subModel_TNe.ag"/>
             <parameter idref="subModel_TNe.frequencies"/>
-            <parameter idref="siteModel_TNe.alpha"/>
         </log>
     </model>
     <model id="TN">
@@ -336,9 +281,6 @@
             <relativeRate>
                 <parameter id="siteModel_TN.mu" value="1.0" lower="0.0"/>
             </relativeRate>
-            <gammaShape gammaCategories="4">
-                <parameter id="siteModel_TN.alpha" value="0.5" lower="0.0"/>
-            </gammaShape>
         </siteModel>
         <operators id="operators" optimizationSchedule="default">
             <scaleOperator scaleFactor="0.75" weight="0.1">
@@ -351,7 +293,6 @@
                 <parameter idref="subModel_TN.frequencies"/>
             </deltaExchange>
             <scaleOperator scaleFactor="0.75" weight="0.1">
-                <parameter idref="siteModel_TN.alpha"/>
             </scaleOperator>
         </operators>
         <prior id="prior">
@@ -364,15 +305,11 @@
             <uniformPrior lower="0.0" upper="1.0">
                 <parameter idref="subModel_TN.frequencies"/>
             </uniformPrior>
-            <exponentialPrior mean="0.5" offset="0.0">
-                <parameter idref="siteModel_TNe.alpha"/>
-            </exponentialPrior>
         </prior>
         <log>
             <parameter idref="subModel_TN.transversion"/>
             <parameter idref="subModel_TN.ag"/>
             <parameter idref="subModel_TN.frequencies"/>
-            <parameter idref="siteModel_TN.alpha"/>
         </log>
     </model>
     <model id="K3P">
@@ -412,9 +349,6 @@
             <relativeRate>
                 <parameter id="siteModel_K3P.mu" value="1.0" lower="0.0"/>
             </relativeRate>
-            <gammaShape gammaCategories="4">
-                <parameter id="siteModel_K3P.alpha" value="0.5" lower="0.0"/>
-            </gammaShape>
         </siteModel>
         <operators id="operators" optimizationSchedule="default">
             <scaleOperator scaleFactor="0.75" weight="0.1">
@@ -422,9 +356,6 @@
             </scaleOperator>
             <scaleOperator scaleFactor="0.75" weight="0.1">
                 <parameter idref="subModel_K3P.pyrimidine2purine"/>
-            </scaleOperator>
-            <scaleOperator scaleFactor="0.75" weight="0.1">
-                <parameter idref="siteModel_K3P.alpha"/>
             </scaleOperator>
         </operators>
         <prior id="prior">
@@ -434,15 +365,11 @@
             <gammaPrior shape="0.05" scale="10.0" offset="0.0">
                 <parameter idref="subModel_K3P.pyrimidine2purine"/>
             </gammaPrior>
-            <exponentialPrior mean="0.5" offset="0.0">
-                <parameter idref="siteModel_K3P.alpha"/>
-            </exponentialPrior>
         </prior>
         <log>
             <parameter idref="subModel_K3P.purine2pyrimidine"/>
             <parameter idref="subModel_K3P.pyrimidine2purine"/>
             <parameter idref="subModel_K3P.frequencies"/>
-            <parameter idref="siteModel_K3P.alpha"/>
         </log>
     </model>
     <model id="K3Pu">
@@ -482,9 +409,6 @@
             <relativeRate>
                 <parameter id="siteModel_K3Pu.mu" value="1.0" lower="0.0"/>
             </relativeRate>
-            <gammaShape gammaCategories="4">
-                <parameter id="siteModel_K3Pu.alpha" value="0.5" lower="0.0"/>
-            </gammaShape>
         </siteModel>
         <operators id="operators" optimizationSchedule="default">
             <scaleOperator scaleFactor="0.75" weight="0.1">
@@ -496,9 +420,6 @@
             <deltaExchange delta="0.01" weight="0.1">
                 <parameter idref="subModel_K3Pu.frequencies"/>
             </deltaExchange>
-            <scaleOperator scaleFactor="0.75" weight="0.1">
-                <parameter idref="siteModel_K3Pu.alpha"/>
-            </scaleOperator>
         </operators>
         <prior id="prior">
             <gammaPrior shape="0.05" scale="10.0" offset="0.0">
@@ -510,15 +431,11 @@
             <uniformPrior lower="0.0" upper="1.0">
                 <parameter idref="subModel_K3Pu.frequencies"/>
             </uniformPrior>
-            <exponentialPrior mean="0.5" offset="0.0">
-                <parameter idref="siteModel_K3Pu.alpha"/>
-            </exponentialPrior>
         </prior>
         <log>
             <parameter idref="subModel_K3Pu.purine2pyrimidine"/>
             <parameter idref="subModel_K3Pu.pyrimidine2purine"/>
             <parameter idref="subModel_K3Pu.frequencies"/>
-            <parameter idref="siteModel_K3Pu.alpha"/>
         </log>
     </model>
     <model id="TIMe">
@@ -558,9 +475,6 @@
             <relativeRate>
                 <parameter id="siteModel_TIMe.mu" value="1.0" lower="0.0"/>
             </relativeRate>
-            <gammaShape gammaCategories="4">
-                <parameter id="siteModel_TIMe.alpha" value="0.5" lower="0.0"/>
-            </gammaShape>
         </siteModel>
         <operators id="operators" optimizationSchedule="default">
             <scaleOperator scaleFactor="0.75" weight="0.1">
@@ -572,9 +486,6 @@
             <scaleOperator scaleFactor="0.75" weight="0.1">
                 <parameter idref="subModel_TIMe.pyrimidine2purine"/>
             </scaleOperator>
-            <scaleOperator scaleFactor="0.75" weight="0.1">
-                <parameter idref="siteModel_TIMe.alpha"/>
-            </scaleOperator>
         </operators>
         <prior id="prior>">
             <gammaPrior shape="0.05" scale="10.0" offset="0.0">
@@ -583,16 +494,12 @@
             <gammaPrior shape="0.05" scale="10.0" offset="0.0">
                 <parameter idref="subModel_TIMe.ag"/>
             </gammaPrior>
-            <exponentialPrior mean="0.5" offset="0.0">
-                <parameter idref="siteModel_TIMe.alpha"/>
-            </exponentialPrior>
         </prior>
         <log>
             <parameter idref="subModel_TIMe.purine2pyrimidine"/>
             <parameter idref="subModel_TIMe.ag"/>
             <parameter idref="subModel_TIMe.pyrimidine2purine"/>
             <parameter idref="subModel_TIMe.frequencies"/>
-            <parameter idref="siteModel_TIMe.alpha"/>
         </log>
     </model>
     <model id="TIM">
@@ -632,9 +539,6 @@
             <relativeRate>
                 <parameter id="siteModel_TIM.mu" value="1.0" lower="0.0"/>
             </relativeRate>
-            <gammaShape gammaCategories="4">
-                <parameter id="siteModel_TIM.alpha" value="0.5" lower="0.0"/>
-            </gammaShape>
         </siteModel>
         <operators id="operators" optimizationSchedule="default">
             <scaleOperator scaleFactor="0.75" weight="0.1">
@@ -649,9 +553,6 @@
             <deltaExchange delta="0.01" weight="0.1">
                 <parameter idref="subModel_TIM.frequencies"/>
             </deltaExchange>
-            <scaleOperator scaleFactor="0.75" weight="0.1">
-                <parameter idref="siteModel_TIM.alpha"/>
-            </scaleOperator>
         </operators>
         <prior id="prior">
             <gammaPrior shape="0.05" scale="10.0" offset="0.0">
@@ -660,9 +561,6 @@
             <gammaPrior shape="0.05" scale="10.0" offset="0.0">
                 <parameter idref="subModel_TIM.ag"/>
             </gammaPrior>
-            <exponentialPrior mean="0.5" offset="0.0">
-                <parameter idref="siteModel_TIM.alpha"/>
-            </exponentialPrior>
             <uniformPrior lower="0.0" upper="1.0">
                 <parameter idref="subModel_TIM.frequencies"/>
             </uniformPrior>
@@ -672,7 +570,6 @@
             <parameter idref="subModel_TIM.ag"/>
             <parameter idref="subModel_TIM.pyrimidine2purine"/>
             <parameter idref="subModel_TIM.frequencies"/>
-            <parameter idref="siteModel_TIM.alpha"/>
         </log>
     </model>
     <model id="TVMe">
@@ -712,9 +609,6 @@
             <relativeRate>
                 <parameter id="siteModel_TVMe.mu" value="1.0" lower="0.0"/>
             </relativeRate>
-            <gammaShape gammaCategories="4">
-                <parameter id="siteModel_TVMe.alpha" value="0.5" lower="0.0"/>
-            </gammaShape>
         </siteModel>
         <operators id="operators" optimizationSchedule="default">
             <scaleOperator scaleFactor="0.75" weight="0.1">
@@ -728,9 +622,6 @@
             </scaleOperator>
             <scaleOperator scaleFactor="0.75" weight="0.1">
                 <parameter idref="subModel_TVMe.gt"/>
-            </scaleOperator>
-            <scaleOperator scaleFactor="0.75" weight="0.1">
-                <parameter idref="siteModel_TVMe.alpha"/>
             </scaleOperator>
         </operators>
         <prior id="prior">
@@ -752,7 +643,6 @@
             <parameter idref="subModel_TVMe.at"/>
             <parameter idref="subModel_TVMe.cg"/>
             <parameter idref="subModel_TVMe.gt"/>
-            <parameter idref="siteModel_TVMe.alpha"/>
         </log>
     </model>
     <model id="TVM">
@@ -792,9 +682,6 @@
             <relativeRate>
                 <parameter id="siteModel_TVM.mu" value="1.0" lower="0.0"/>
             </relativeRate>
-            <gammaShape gammaCategories="4">
-                <parameter id="siteModel_TVM.alpha" value="0.5" lower="0.0"/>
-            </gammaShape>
         </siteModel>
         <operators id="operators" optimizationSchedule="default">
             <scaleOperator scaleFactor="0.75" weight="0.1">
@@ -812,9 +699,6 @@
             <deltaExchange delta="0.01" weight="0.1">
                 <parameter idref="subModel_TVM.frequencies"/>
             </deltaExchange>
-            <scaleOperator scaleFactor="0.75" weight="0.1">
-                <parameter idref="siteModel_TVM.alpha"/>
-            </scaleOperator>
         </operators>
         <prior id="prior">
             <gammaPrior shape="0.05" scale="10.0" offset="0.0">
@@ -839,7 +723,6 @@
             <parameter idref="subModel_TVM.cg"/>
             <parameter idref="subModel_TVM.gt"/>
             <parameter idref="subModel_TVM.frequencies"/>
-            <parameter idref="siteModel_TVM.alpha"/>
         </log>
     </model>
     <model id="SYM">
@@ -879,9 +762,6 @@
             <relativeRate>
                 <parameter id="siteModel_SYM.mu" value="1.0" lower="0.0"/>
             </relativeRate>
-            <gammaShape gammaCategories="4">
-                <parameter id="siteModel_SYM.alpha" value="0.5" lower="0.0"/>
-            </gammaShape>
         </siteModel>
         <operators id="operators" optimizationSchedule="default">
             <scaleOperator scaleFactor="0.75" weight="0.1">
@@ -898,9 +778,6 @@
             </scaleOperator>
             <scaleOperator scaleFactor="0.75" weight="0.1">
                 <parameter idref="subModel_SYM.gt"/>
-            </scaleOperator>
-            <scaleOperator scaleFactor="0.75" weight="0.1">
-                <parameter idref="siteModel_SYM.alpha"/>
             </scaleOperator>
         </operators>
         <prior id="prior">
@@ -927,7 +804,6 @@
             <parameter idref="subModel_SYM.cg"/>
             <parameter idref="subModel_SYM.gt"/>
             <parameter idref="subModel_SYM.frequencies"/>
-            <parameter idref="siteModel_SYM.alpha"/>
         </log>
     </model>
     <model id="GTR">
@@ -967,9 +843,6 @@
             <relativeRate>
                 <parameter id="siteModel_GTR.mu" value="1.0" lower="0.0"/>
             </relativeRate>
-            <gammaShape gammaCategories="4">
-                <parameter id="siteModel_GTR.alpha" value="0.5" lower="0.0"/>
-            </gammaShape>
         </siteModel>
         <operators id="operators" optimizationSchedule="default">
             <scaleOperator scaleFactor="0.75" weight="0.1">
@@ -990,9 +863,6 @@
             <deltaExchange delta="0.01" weight="0.1">
                 <parameter idref="subModel_GTR.frequencies"/>
             </deltaExchange>
-            <scaleOperator scaleFactor="0.75" weight="0.1">
-                <parameter idref="siteModel_GTR.alpha"/>
-            </scaleOperator>
         </operators>
         <prior id="prior">
             <gammaPrior shape="0.05" scale="10.0" offset="0.0">
@@ -1021,7 +891,6 @@
             <parameter idref="subModel_GTR.cg"/>
             <parameter idref="subModel_GTR.gt"/>
             <parameter idref="subModel_GTR.frequencies"/>
-            <parameter idref="siteModel_GTR.alpha"/>
         </log>
     </model>
 </models>
