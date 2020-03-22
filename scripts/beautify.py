@@ -91,22 +91,18 @@ def parse_args(argv):
     )
     parser.add_argument("path", type=FileType(), help="the path to the multiple sequence alignment FASTA file")
     parser.add_argument("tdir", help="the template directory", type=Path)
+    parser.add_argument("model", help="the substitution model id, add +I and +G for invariant and heterogeneity site models respectively")
+    parser.add_argument("clock", help="the clock model")
+    parser.add_argument("coalescent", help="the coalescent model")
 
     # parsing
     parser.add_argument("-dregex", help="the regular expression to extract the tip dates", default="(\d{4}-\d{2}-\d{2})")
     parser.add_argument("-dformat", help="the date format for tip dates", default="%Y-%m-%d")
 
-    # modeling
-    parser.add_argument("model", help="the substitution model id")
-    parser.add_argument("clock", help="the clock model")
-    parser.add_argument("coalescent", help="the coalescent model")
-    parser.add_argument("-gamma", action="store_true", help="the flag for site rate heterogeneity model")
-    parser.add_argument("-invariant", action="store_true", help="the flag for invariant site model")
-
     # mcmc
     parser.add_argument("-len_mcmc", type=int, help="the chain length for MCMC", default=10000000)
     parser.add_argument("-len_psss", type=int, help="the chain length for PS/SS", default=1000000)
-    parser.add_argument("-echo_mcmc", type=int, help="the sampling frequency for PS/SS", default=10000)
+    parser.add_argument("-echo_mcmc", type=int, help="the sampling frequency for MCMC", default=10000)
     parser.add_argument("-echo_psss", type=int, help="the sampling frequency for PS/SS", default=1000)
     parser.add_argument("-path_steps", type=int, help="the number of path steps for PS/SS", default=100)
 
@@ -118,9 +114,10 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv[1:])
-    
+
     with args.tdir.joinpath("model.xml").open() as file:
-        model = BeautifulSoup(file, "xml").find("model", id=args.model)
+        model_id = args.model.split("+", maxsplit=1)[0]
+        model = BeautifulSoup(file, "xml").find("model", id=model_id)
         sub_model = model.select_one("subModel")
         site_model = model.select_one("#sitemodel")
         operators = model.select_one("operators")
@@ -143,9 +140,9 @@ def main(argv):
             soup.beast.mcmc.joint.prior.append(ele)
         for ele in list(log.children):
             soup.select_one("#fileLog").append(ele)
-        if args.gamma:
+        if "+G" in args.model:
             gammaize(soup)
-        if args.invariant:
+        if "+I" in args.model:
             invariantize(soup)
         # mcmc
         soup.select_one("mcmc")["chainLength"] = args.len_mcmc
@@ -164,7 +161,7 @@ def main(argv):
         soup.select_one("steppingStoneSamplingAnalysis")["fileName"] = args.stem + ".mle.log"
         soup.select_one("steppingStoneSamplingAnalysis")["resultsFileName"] = args.stem + ".mle.result.log"
 
-    print(soup)
+    print(soup.prettify())
 
     return 0
 

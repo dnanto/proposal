@@ -119,7 +119,7 @@ This example parameterizes the rate matrix relative to the A<->G transition
         </subModel>
         <siteModel id="sitemodel">
             <substitutionModel>
-                <hkyModel idref="sitemodel"/>
+                <hkyModel idref="submodel"/>
             </substitutionModel>
             <relativeRate>
                 <parameter id="sitemodel.mu" value="1.0" lower="0.0"/>
@@ -158,7 +158,7 @@ This example parameterizes the rate matrix relative to the A<->G transition
         </subModel>
         <siteModel id="sitemodel">
             <substitutionModel>
-                <hkyModel idref="sitemodel"/>
+                <hkyModel idref="submodel"/>
             </substitutionModel>
             <relativeRate>
                 <parameter id="sitemodel.mu" value="1.0" lower="0.0"/>
