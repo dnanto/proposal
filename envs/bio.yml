@@ -1,4 +1,5 @@
 dependencies:
+  - bioconda::snakemake-minimal 
   - bioconda::blast=2.9.0
   - biobuilds::fasta=36.3.8e
   - bioconda::mafft=7.455
