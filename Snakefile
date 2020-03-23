@@ -4,9 +4,13 @@ include: "rules/common.smk"
 
 rule all:
     input:
-        target
+        target_extract,
+        target_phylo,
+        target_beautify
 
 ## modules ##
 
+include: "rules/targets.smk"
 include: "rules/extract.smk"
 include: "rules/phylo.smk"
+include: "rules/beast.smk"

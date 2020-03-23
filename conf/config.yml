@@ -20,7 +20,7 @@ dates:
     - "%Y"
 beast:
   len_mcmc: 100000000
-  len_psss: 1000000
   echo_mcmc: 10000
+  len_psss: 1000000
   echo_psss: 1000
   path_steps: 100

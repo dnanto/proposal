@@ -84,28 +84,42 @@ def invariantize(soup):
     """, "lxml-xml"))
     soup.select_one("#fileLog").append(soup.new_tag("parameter", idref="sitemodel.pInv"))
 
+def psss_tags(soup, path, **kwargs):
+    with open(path) as file:
+        for ele in list(BeautifulSoup(file, "xml").select_one("mle").children):
+            soup.beast.append(ele)
+        stem = kwargs["stem"]
+        soup.select_one("marginalLikelihoodEstimator")["chainLength"] = kwargs["len_psss"]
+        soup.select_one("marginalLikelihoodEstimator")["pathSteps"] = kwargs["path_steps"]
+        soup.select_one("#MLELog")["logEvery"] = kwargs["echo_psss"]
+        soup.select_one("#MLELog")["fileName"] = stem + ".mle.log"
+        soup.select_one("pathSamplingAnalysis")["fileName"] = stem + ".mle.log"
+        soup.select_one("pathSamplingAnalysis")["resultsFileName"] = stem + ".mle.result.log"
+        soup.select_one("steppingStoneSamplingAnalysis")["fileName"] = stem + ".mle.log"
+        soup.select_one("steppingStoneSamplingAnalysis")["resultsFileName"] = stem + ".mle.result.log"
+
 def parse_args(argv):
     parser = ArgumentParser(
         description="generate a BEAST input file based on an xml template...",
         formatter_class=ArgumentDefaultsHelpFormatter
     )
-    parser.add_argument("path", type=FileType(), help="the path to the multiple sequence alignment FASTA file")
+    # taxa 
+    parser.add_argument("msa", type=FileType(), help="the path to the multiple sequence alignment FASTA file")
+    # model
     parser.add_argument("tdir", help="the template directory", type=Path)
     parser.add_argument("model", help="the substitution model id, add +I and +G for invariant and heterogeneity site models respectively")
     parser.add_argument("clock", help="the clock model")
     parser.add_argument("coalescent", help="the coalescent model")
-
     # parsing
     parser.add_argument("-dregex", help="the regular expression to extract the tip dates", default="(\d{4}-\d{2}-\d{2})")
     parser.add_argument("-dformat", help="the date format for tip dates", default="%Y-%m-%d")
-
     # mcmc
     parser.add_argument("-len_mcmc", type=int, help="the chain length for MCMC", default=10000000)
-    parser.add_argument("-len_psss", type=int, help="the chain length for PS/SS", default=1000000)
     parser.add_argument("-echo_mcmc", type=int, help="the sampling frequency for MCMC", default=10000)
+    # psss
+    parser.add_argument("-len_psss", type=int, help="the chain length for PS/SS", default=1000000)
     parser.add_argument("-echo_psss", type=int, help="the sampling frequency for PS/SS", default=1000)
     parser.add_argument("-path_steps", type=int, help="the number of path steps for PS/SS", default=100)
-
     # logging
     parser.add_argument("-stem", help="the output file stem", default="run")
     parser.add_argument("-echo", type=int, help="the echo frequency", default=0)
@@ -128,7 +142,7 @@ def main(argv):
     with args.tdir.joinpath(f"{args.clock}-{args.coalescent}.xml").open() as file:
         soup = BeautifulSoup(file, "xml")
         # taxa
-        tag_tax, tag_aln = taxa_tags(soup, args.path, args.dregex, args.dformat)
+        tag_tax, tag_aln = taxa_tags(soup, args.msa, args.dregex, args.dformat)
         soup.beast.insert(0, tag_tax)
         soup.beast.insert(1, tag_aln)
         # model
@@ -144,22 +158,16 @@ def main(argv):
             gammaize(soup)
         if "+I" in args.model:
             invariantize(soup)
-        # mcmc
+        # MCMC
         soup.select_one("mcmc")["chainLength"] = args.len_mcmc
         soup.select_one("mcmc")["operatorAnalysis"] = args.stem + ".ops"
         soup.select_one("#fileLog")["logEvery"] = args.echo_mcmc
         soup.select_one("#fileLog")["fileName"] = args.stem + ".log"
         soup.select_one("logTree")["logEvery"] = args.echo_mcmc
         soup.select_one("logTree")["fileName"] = args.stem + ".trees"
-        soup.select_one("marginalLikelihoodEstimator")["chainLength"] = args.len_psss
-        soup.select_one("marginalLikelihoodEstimator")["pathSteps"] = args.path_steps
-        soup.select_one("#MLELog")["logEvery"] = args.echo_psss
-        soup.select_one("#MLELog")["fileName"] = args.stem + ".mle.log"
         soup.select_one("#screenLog")["logEvery"] = args.echo
-        soup.select_one("pathSamplingAnalysis")["fileName"] = args.stem + ".mle.log"
-        soup.select_one("pathSamplingAnalysis")["resultsFileName"] = args.stem + ".mle.result.log"
-        soup.select_one("steppingStoneSamplingAnalysis")["fileName"] = args.stem + ".mle.log"
-        soup.select_one("steppingStoneSamplingAnalysis")["resultsFileName"] = args.stem + ".mle.result.log"
+        # PS/SS
+        psss_tags(soup, args.tdir.joinpath("psss.xml"), **vars(args))
 
     print(soup.prettify())
 

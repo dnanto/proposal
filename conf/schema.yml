@@ -64,14 +64,14 @@ properties:
       type: int
       description: the chain length for MCMC
       default: 100000000
-    len_psss:
-      type: int
-      description: the chain length for PS/SS
-      default: 1000000
     echo_mcmc:
       type: int
       description: the sampling frequency for MCMC
       default: 10000
+    len_psss:
+      type: int
+      description: the chain length for PS/SS
+      default: 1000000
     echo_psss:
       type: int
       description: the sampling frequency for PS/SS

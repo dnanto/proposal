@@ -81,7 +81,7 @@ rule extract:
     root / "glb.tsv",
     root / "lib.fna"
   output:
-    root / "reg.fna"
+    target_extract
   run:
     # keep accessions with collection_date
     with open(input[0]) as file:
