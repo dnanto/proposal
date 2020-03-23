@@ -148,9 +148,9 @@ def main(argv):
         soup.select_one("mcmc")["chainLength"] = args.len_mcmc
         soup.select_one("mcmc")["operatorAnalysis"] = args.stem + ".ops"
         soup.select_one("#fileLog")["logEvery"] = args.echo_mcmc
-        soup.select_one("#fileLog")["fileName"] = args.stem + ".ops"
+        soup.select_one("#fileLog")["fileName"] = args.stem + ".log"
         soup.select_one("logTree")["logEvery"] = args.echo_mcmc
-        soup.select_one("logTree")["fileName"] = args.stem + ".ops"
+        soup.select_one("logTree")["fileName"] = args.stem + ".trees"
         soup.select_one("marginalLikelihoodEstimator")["chainLength"] = args.len_psss
         soup.select_one("marginalLikelihoodEstimator")["pathSteps"] = args.path_steps
         soup.select_one("#MLELog")["logEvery"] = args.echo_psss
