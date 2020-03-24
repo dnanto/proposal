@@ -23,7 +23,7 @@ rule beautify:
         model=( $(basename "$ele" | tr '[\-.]' ' ') );
         mkdir -p "$(dirname $ele)";
         ./scripts/beautify.py \
-          -stem "${{model[0]}}.${{model[1]}}" \
+          -stem "${{model[0]}}-${{model[1]}}" \
           -len_mcmc {params.len_mcmc:q} -len_psss {params.len_psss:q} \
           -echo_mcmc {params.echo_mcmc:q} -echo_psss {params.echo_psss:q} \
           -path_steps {params.path_steps:q} \
