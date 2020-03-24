@@ -138,7 +138,6 @@ def main(argv):
         prior = model.select_one("prior")
         log = model.select_one("log")
     
-    # print(args.tdir.joinpath(f"{args.clock}-{args.coalescent}.xml"))
     with args.tdir.joinpath(f"{args.clock}-{args.coalescent}.xml").open() as file:
         soup = BeautifulSoup(file, "xml")
         # taxa
