@@ -5,21 +5,20 @@ rule beautify:
   output:
     target_beautify
   params:
-    **config["beast"]
+    **config
   conda:
     "../envs/bio.yml"
   shell:
     """
       line=( $(
         grep -v WARNING {input[1]:q} | \
-          awk '{{$1=$1}}; f;/No./{{f=1}}' | \
-          awk 'NR <= 132' | \
-          grep -v "+R" | \
+          awk '{{$1=$1;}} //1;' | \
+          grep -A 131 '1 JC' | \
+          grep -v +R | \
           sort -n -k 7 | \
           head -n 1 | \
           sed -e 's/+G4/+G/g' -e 's/+F//g'
       ) );
-      echo ${{line[1]}};
       for ele in {output}; do
       model=( $(basename "$ele" | tr '[\-.]' ' ') );
       mkdir -p "$(dirname $ele)";

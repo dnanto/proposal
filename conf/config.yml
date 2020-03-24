@@ -1,26 +1,4 @@
+qry: data/FJ643676.1/ACU57030.fna
+db: "10508"
 out: out
-qry: data/FJ643676.1/ACU57037.fna
 cpu: 8
-align:
-  task: blastn
-  db: data/blast/10508/10508
-  perc_identity: 95
-  qcov_hsp_perc: 95
-  qcov_identity: 95
-  max_target_seqs: 20000
-entrez:
-  email: ""
-  db: nuccore
-  post_size: 500
-dates:
-  formats:
-    - "%d-%b-%Y"
-    - "%Y-%m-%d"
-    - "%b-%Y"
-    - "%Y"
-beast:
-  len_mcmc: 100000000
-  echo_mcmc: 10000
-  len_psss: 1000000
-  echo_psss: 1000
-  path_steps: 100

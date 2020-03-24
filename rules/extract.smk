@@ -12,8 +12,7 @@ rule local:
   output:
     root / "lcl.tsv"
   params:
-    **config["align"],
-    num_threads = config["cpu"]
+    **config
   conda:
     "../envs/bio.yml"
   shell:    
@@ -21,7 +20,7 @@ rule local:
     blastn \
       -task {params.task:q} -db {params.db:q} -query {input:q} -out {output:q} -outfmt 7 \
       -perc_identity {params.perc_identity:q} -qcov_hsp_perc {params.qcov_hsp_perc:q} \
-      -max_target_seqs {params.max_target_seqs:q} -num_threads {params.num_threads:q} \
+      -max_target_seqs {params.max_target_seqs:q} -num_threads {params.cpu:q} \
       ;
     """
 
@@ -31,7 +30,7 @@ rule entry:
     output:
         root / "lib.fna"
     params:
-        config["align"]["db"]
+        config["db"]
     conda:
       "../envs/bio.yml"
     shell:
@@ -56,8 +55,7 @@ rule feature:
   output:
     root / "src.tsv"
   params:
-    **{**config["entrez"], **config["dates"]},
-    qcov_identity = config["align"]["qcov_identity"]
+    **config
   run:
     Entrez.email = params.email
     with open(input[0]) as file1, open(output[0], "w") as file2:
@@ -67,10 +65,10 @@ rule feature:
       print(*keys, sep = "\t", file = file2)
       subjects = (
           row["subject id"] for row in parse_outfmt7(file1) 
-          if float(row["% identity"]) > params.qcov_identity
+          if float(row["% identity"]) > params.qcov_per_iden
       )
       for batch in batchify(subjects, size=params.post_size):
-          with Entrez.esummary(db=params.db, id=",".join(batch), retmode="json") as handle:
+          with Entrez.esummary(db=params.edb, id=",".join(batch), retmode="json") as handle:
               for row in process_esummary(handle):
                   row[key] = normalize_date(row.get(key), params.formats)
                   print(*getter(row), sep = "\t", file = file2)

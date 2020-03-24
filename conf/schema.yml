@@ -3,83 +3,81 @@ $schema: "http://json-schema.org/draft-06/schema#"
 description: parameters
 
 properties:
+  qry:
+    type: string
+    description: the query FASTA file
+  db:
+    type: string
+    description: the BLAST database name
   out:
     type: string
     description: the ouput directory
     default: out
-  qry:
-    type: string
-    description: the query FASTA file
   cpu:
     type: integer
     description: the number of CPUs to use
     default: 8
-  align:
-    task:
-      type: string
-      description: "the task to execute: blastn, blastn-short, dc-megablast, megablast, rmblastn"
-      default: blastn
-    db:
-      type: string
-      description: the BLAST database name
-    perc_identity:
-      type: number
-      description: the percent identity in [0, 100]
-      default: 95
-    qcov_hsp_perc:
-      type: number
-      description: the percent query coverage per hsp in [0, 100]
-      default: 95
-    qcov_per_iden:
-      type: number
-      description: the percent query coverage identity [0, 100]
-      default: 95
-    max_target_seqs:
-      type: string
-      description: the maximum number of aligned sequences to keep
-      default: 20000
-  entrez:
-    email:
-      type: string
-      description: the e-mail to identify yourself to NCBI (for politeness reasons)
-    db:
-      type: string
-      description: the NCBI database
-      default: nuccore
-    post_size:
-      type: integer
-      description: the number of records to post at a time
-      default: 500
-  dates:
-    formats:
-      type: stringArray
-      description: the order of date formats to try and parse
-      default:
-        - "%d-%b-%Y"
-        - "%Y-%m-%d"
-        - "%b-%Y"
-        - "%Y"
-  beast:
-    len_mcmc:
-      type: int
-      description: the chain length for MCMC
-      default: 100000000
-    echo_mcmc:
-      type: int
-      description: the sampling frequency for MCMC
-      default: 10000
-    len_psss:
-      type: int
-      description: the chain length for PS/SS
-      default: 1000000
-    echo_psss:
-      type: int
-      description: the sampling frequency for PS/SS
-      default: 1000
-    path_steps:
-      type: int
-      description: the number of path steps for PS/SS
-      default: 100
+  task:
+    type: string
+    description: "the task to execute: blastn, blastn-short, dc-megablast, megablast, rmblastn"
+    default: blastn
+  perc_identity:
+    type: number
+    description: the percent identity in [0, 100]
+    default: 95
+  qcov_hsp_perc:
+    type: number
+    description: the percent query coverage per hsp in [0, 100]
+    default: 95
+  qcov_per_iden:
+    type: number
+    description: the percent query coverage identity [0, 100]
+    default: 95
+  max_target_seqs:
+    type: integer
+    description: the maximum number of aligned sequences to keep
+    default: 20000
+  email:
+    type: string
+    description: the e-mail to identify yourself to NCBI (for politeness reasons)
+    default: ""
+  edb:
+    type: string
+    description: the NCBI database
+    default: nuccore
+  post_size:
+    type: integer
+    description: the number of records to post at a time
+    default: 500
+  formats:
+    type: array
+    description: the order of date formats to try and parse
+    default:
+      - "%d-%b-%Y"
+      - "%Y-%m-%d"
+      - "%b-%Y"
+      - "%Y"
+  len_mcmc:
+    type: integer
+    description: the chain length for MCMC
+    default: 100000000
+  echo_mcmc:
+    type: integer
+    description: the sampling frequency for MCMC
+    default: 10000
+  len_psss:
+    type: integer
+    description: the chain length for PS/SS
+    default: 1000000
+  echo_psss:
+    type: integer
+    description: the sampling frequency for PS/SS
+    default: 1000
+  path_steps:
+    type: integer
+    description: the number of path steps for PS/SS
+    default: 100
 
 required:
   - qry
+  - db
