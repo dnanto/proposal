@@ -17,8 +17,9 @@ rule phy:
   output:
     target_phylo
   params:
-    root / "phy" / "run"
+    root / "phy" / "run",
+    config["cpu"]
   conda:
     "../envs/bio.yml"
   shell:
-    """rm -f {params[0]:q}.* && iqtree -s {input:q} -pre {params[0]:q} -alrt 1000 -bb 1000 -bnni -nt AUTO > /dev/null;"""
+    """rm -f {params[0]:q}.* && iqtree -s {input:q} -pre {params[0]:q} -alrt 1000 -bb 1000 -bnni -nt {params[1]:q} > /dev/null;"""
