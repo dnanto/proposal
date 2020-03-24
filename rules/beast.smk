@@ -20,13 +20,13 @@ rule beautify:
           sed -e 's/+G4/+G/g' -e 's/+F//g'
       ) );
       for ele in {output}; do
-      model=( $(basename "$ele" | tr '[\-.]' ' ') );
-      mkdir -p "$(dirname $ele)";
-      ./scripts/beautify.py \
-        -stem "${{ele/.xml/}}" \
-        -len_mcmc {params.len_mcmc:q} -len_psss {params.len_psss:q} \
-        -echo_mcmc {params.echo_mcmc:q} -echo_psss {params.echo_psss:q} \
-        -path_steps {params.path_steps:q} \
-        {input[0]:q} ./templates "${{line[1]}}" "${{model[0]}}" "${{model[1]}}" > $ele;
+        model=( $(basename "$ele" | tr '[\-.]' ' ') );
+        mkdir -p "$(dirname $ele)";
+        ./scripts/beautify.py \
+          -stem "${{model[0]}}.${{model[1]}}" \
+          -len_mcmc {params.len_mcmc:q} -len_psss {params.len_psss:q} \
+          -echo_mcmc {params.echo_mcmc:q} -echo_psss {params.echo_psss:q} \
+          -path_steps {params.path_steps:q} \
+          {input[0]:q} ./templates "${{line[1]}}" "${{model[0]}}" "${{model[1]}}" > $ele;
       done;
     """
