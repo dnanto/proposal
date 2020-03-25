@@ -1,0 +1,4 @@
+dependencies:
+  - r::devtools
+  - r::rJava
+  - r::RBeast

@@ -1,0 +1,39 @@
+---
+title: "report"
+output: html_document
+params:
+  root: out
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+parse_mle_report <- function(path)
+{
+  lines <- read_lines(path)
+  PS = "log marginal likelihood (using path sampling) from pathLikelihood.delta = "
+  SS = "log marginal likelihood (using stepping stone sampling) from pathLikelihood.delta = "
+  list(
+    path = path,
+    PS = as.double(str_sub(lines[startsWith(lines, PS)], nchar(PS) + 1)),
+    SS = as.double(str_sub(lines[startsWith(lines, SS)], nchar(SS) + 1))
+  )
+}
+list.files(params$root, pattern = ".mle.result.log", recursive = T, full.names = T) %>%
+  lapply(parse_mle_report) %>%
+  bind_rows() %>%#
+  mutate_at("path", str_remove, pattern = "\\..*") %>%
+  separate(path, c("root", "accver", "beast", "clock", "coalescent"), sep = "[/\\-]") %>%
+  select(accver, clock, coalescent, PS, SS) %>%
+  group_by(accver) %>% 
+	mutate(
+		`BF (PS)` = PS - PS[which(clock == "str" & coalescent == "con")],
+		`BF (SS)` = SS - SS[which(clock == "str" & coalescent == "con")]
+	) %>%
+  ungroup() %>%
+  arrange(accver, desc(`BF (PS)`))
+```
+
