@@ -1,4 +1,5 @@
 dependencies:
-  - r::devtools
-  - r::rJava
-  - r::RBeast
+  - r::r-knitr
+  - r::r-tidyverse
+  - r::r-lubridate
+  - r::r-tracerer

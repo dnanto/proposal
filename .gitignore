@@ -7,3 +7,4 @@ data
 dag.*
 out
 envs/bio
+envs/R

@@ -17,11 +17,11 @@ rule local:
     "../envs/bio.yml"
   shell:    
     """
-    blastn \
-      -task {params.task:q} -db {params.db:q} -query {input:q} -out {output:q} -outfmt 7 \
-      -perc_identity {params.perc_identity:q} -qcov_hsp_perc {params.qcov_hsp_perc:q} \
-      -max_target_seqs {params.max_target_seqs:q} -num_threads {params.cpu:q} \
-      ;
+      blastn \
+        -task {params.task:q} -db {params.db:q} -query {input:q} -out {output:q} -outfmt "7 std sstrand qlen" \
+        -perc_identity {params.perc_identity:q} -qcov_hsp_perc {params.qcov_hsp_perc:q} \
+        -max_target_seqs {params.max_target_seqs:q} -num_threads {params.cpu:q} \
+        ;
     """
 
 rule entry:
@@ -34,7 +34,7 @@ rule entry:
     conda:
       "../envs/bio.yml"
     shell:
-        """awk '/^[^#]/ {{ print $2; }}' {input:q} | uniq | blastdbcmd -db {params:q} -entry_batch - > {output:q};"""
+        """./scripts/contextify.awk {input:q} | uniq | blastdbcmd -db {params:q} -entry_batch - | sed -E 's/:c?[0-9]*-.*//g' > {output:q};"""
 
 rule glocal:
     input:
