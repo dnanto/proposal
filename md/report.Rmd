@@ -2,7 +2,7 @@
 title: "report"
 output: html_document
 params:
-  root: out
+  root: ../out
 ---
 
 ```{r setup, include=FALSE}
@@ -22,18 +22,21 @@ parse_mle_report <- function(path)
     SS = as.double(str_sub(lines[startsWith(lines, SS)], nchar(SS) + 1))
   )
 }
+
 list.files(params$root, pattern = ".mle.result.log", recursive = T, full.names = T) %>%
   lapply(parse_mle_report) %>%
-  bind_rows() %>%#
-  mutate_at("path", str_remove, pattern = "\\..*") %>%
-  separate(path, c("root", "accver", "beast", "clock", "coalescent"), sep = "[/\\-]") %>%
-  select(accver, clock, coalescent, PS, SS) %>%
-  group_by(accver) %>% 
+  bind_rows() %>%
+  mutate_at("path", str_remove, str_c("^", params$root, .Platform$file.sep, "?")) %>%
+  separate(path, c("acc", "beast", "name"), .Platform$file.sep) %>%
+  separate(name, c("clock", "coalescent"), "[-.]", extra = "drop") %>%
+  select(acc, clock, coalescent, PS, SS) %>%
+  group_by(acc) %>%
 	mutate(
 		`BF (PS)` = PS - PS[which(clock == "str" & coalescent == "con")],
 		`BF (SS)` = SS - SS[which(clock == "str" & coalescent == "con")]
 	) %>%
   ungroup() %>%
-  arrange(accver, desc(`BF (PS)`))
+  arrange(acc, desc(`BF (PS)`))
 ```
+
 
