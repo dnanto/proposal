@@ -6,11 +6,23 @@ params:
 ---
 
 ```{r setup, include=FALSE}
+library(ggtree)
 library(tidyverse)
+library(tracerer)
+library(parallel)
 knitr::opts_chunk$set(echo = TRUE)
+options(mc.cores = detectCores())
 ```
 
 ```{r}
+path_to_meta <- function(df)
+{
+  mutate_at(df, "path", str_remove, str_c("^", params$root, .Platform$file.sep, "?")) %>%
+    separate(path, c("acc", "beast", "name"), .Platform$file.sep) %>%
+    separate(name, c("clock", "coalescent"), "[-.]", extra = "drop") %>%
+    select(-beast)
+}
+
 parse_mle_report <- function(path)
 {
   lines <- read_lines(path)
@@ -23,12 +35,11 @@ parse_mle_report <- function(path)
   )
 }
 
-list.files(params$root, pattern = ".mle.result.log", recursive = T, full.names = T) %>%
+df.mle <-
+  list.files(params$root, pattern = ".mle.result.log", recursive = T, full.names = T) %>%
   lapply(parse_mle_report) %>%
   bind_rows() %>%
-  mutate_at("path", str_remove, str_c("^", params$root, .Platform$file.sep, "?")) %>%
-  separate(path, c("acc", "beast", "name"), .Platform$file.sep) %>%
-  separate(name, c("clock", "coalescent"), "[-.]", extra = "drop") %>%
+  path_to_meta() %>%
   select(acc, clock, coalescent, PS, SS) %>%
   group_by(acc) %>%
 	mutate(
@@ -37,6 +48,26 @@ list.files(params$root, pattern = ".mle.result.log", recursive = T, full.names =
 	) %>%
   ungroup() %>%
   arrange(acc, desc(`BF (PS)`))
+```
+
+```{r}
+pburn <- 0.1
+df.ess <-
+  list.files(params$root, pattern = "\\w+-\\w+.log", recursive = T, full.names = T) %>%
+  mclapply(function(path) {
+    df <- parse_beast_log(path)
+    interval <- df$state[2] - df$state[1]
+    select(df, joint, prior, likelihood, age.root., meanRate, coalescent) %>%
+      apply(2, function(ele) calc_ess(remove_burn_in(ele, pburn), interval)) %>%
+      c(path = path)
+  }) %>% 
+  map_df(bind_rows) %>%
+  path_to_meta() %>%
+  select(acc, clock, coalescent, everything())
+```
+
+```{r}
+merge(df.mle, df.ess, by = c("acc", "clock", "coalescent"), sort = F)
 ```
 
 

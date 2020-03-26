@@ -3,3 +3,4 @@ dependencies:
   - r::r-tidyverse
   - r::r-lubridate
   - r::r-tracerer
+  - bioconda::bioconductor-ggtree 

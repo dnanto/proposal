@@ -2,6 +2,7 @@
 .pkg
 .snakemake
 .vscode
+bkp.*
 env
 data
 dag.*
