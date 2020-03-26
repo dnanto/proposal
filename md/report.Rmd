@@ -40,7 +40,6 @@ df.mle <-
   lapply(parse_mle_report) %>%
   bind_rows() %>%
   path_to_meta() %>%
-  select(acc, clock, coalescent, PS, SS) %>%
   group_by(acc) %>%
 	mutate(
 		`BF (PS)` = PS - PS[which(clock == "str" & coalescent == "con")],
@@ -67,7 +66,29 @@ df.ess <-
 ```
 
 ```{r}
-merge(df.mle, df.ess, by = c("acc", "clock", "coalescent"), sort = F)
+df <- merge(df.mle, df.ess, by = c("acc", "clock", "coalescent"), sort = F)
+df
 ```
 
+```{r, fig.width=10, fig.height=4}
+df.top <-
+  group_by(df, acc) %>% 
+  top_n(1, `BF (PS)`) %>%
+  head(1)
 
+tree <-
+  with(df.top, file.path(params$root, acc, "beast", str_interp("${clock}-${coalescent}.mcc.tree"))) %>%
+  treeio::read.beast()
+
+tip.date <- str_extract(tree@phylo$tip.label, "\\d{4}-\\d{2}-\\d{2}")
+mrsd <- min(tip.date)
+
+ggtree(tree, mrsd = mrsd, right = T) +
+  geom_tiplab(size = 2, linesize = 0.25, align = T) +
+  geom_range(range = "height_0.95_HPD", color = "blue", alpha = 0.5, size = 1) +
+  theme_tree2() +
+  theme(
+    panel.grid.major.x = element_line(color="black", size = .25),
+    panel.grid.minor.x = element_line(color="grey", size = .25)
+  )
+```
