@@ -1,6 +1,7 @@
 dependencies:
   - r::r-knitr
+  - r::r-foreach
+  - r::r-tracerer
   - r::r-tidyverse
   - r::r-lubridate
-  - r::r-tracerer
   - bioconda::bioconductor-ggtree 
