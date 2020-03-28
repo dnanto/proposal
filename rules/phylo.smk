@@ -1,25 +1,50 @@
-rule msa:
+rule phy:
   input:
     root / "reg.fna"
   output:
-    root / "msa.fna",
-    root / "msa.log",
+    root / "phy" / "msa-1.fna",
+    root / "phy" / "msa-1.log",
+    root / "phy" / "run-1.treefile"
   params:
-    config["cpu"]
+    config["cpu"],
+    root / "phy" / "run-1"
   conda:
     "../envs/bio.yml"
   shell:
-    """mafft --auto --adjustdirection --thread {params[0]:q} {input:q} > {output[0]:q} 2> {output[1]:q};"""
+    """
+      mafft --auto --adjustdirection --thread {params[0]:q} {input:q} > {output[0]:q} 2> {output[1]:q} && \
+      rm -f {params[1]:q}.* && iqtree -s {output[0]:q} -pre {params[1]:q} -alrt 1000 -bb 1000 -bnni -nt {params[0]:q} > /dev/null;
+    """
 
-rule phy:
+rule outlier:
   input:
-    root / "msa.fna"
+    root / "phy" / "run-1.treefile",
+    root / "phy" / "msa-1.fna"
   output:
-    target_phylo
+    root / "phy" / "run-1.txt"
   params:
-    root / "phy" / "run",
+    config["alpha"],
     config["cpu"]
   conda:
-    "../envs/bio.yml"
+    "../envs/R.yml"
+  script:
+    "../scripts/outliers.R"
+
+rule rephy:
+  input:
+    root / "reg.fna",
+    root / "phy" / "run-1.txt"
+  output:
+    root / "reg.fna.fai",
+    root / "phy" / "msa-2.fna",
+    root / "phy" / "msa-2.log",
+    root / "phy" / "run-2.log"
+  params:
+    config["cpu"],
+    root / "phy" / "run-2"
   shell:
-    """rm -f {params[0]:q}.* && iqtree -s {input:q} -pre {params[0]:q} -alrt 1000 -bb 1000 -bnni -nt {params[1]:q} > /dev/null;"""
+    """
+      rm -f {output[0]:q} && sed 's/_/|/g' {input[1]:q} | samtools faidx -r - {input[0]:q} | \
+      mafft --auto --adjustdirection --thread {params[0]:q} - > {output[1]:q} 2> {output[2]:q} && \
+      rm -f {params[1]:q}.* && iqtree -s {output[1]:q} -pre {params[1]:q} -alrt 1000 -bb 1000 -bnni -nt {params[0]:q} > /dev/null;
+    """

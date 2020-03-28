@@ -19,7 +19,6 @@ validate(config, "../conf/schema.yml")
 root = Path(config["out"]) / Path(config["qry"]).stem
 
 target_extract = root / "reg.fna"
-target_phylo = root / "phy" / "run.log"
 target_beautify = (
   root / "beast" / "rex-con.xml",
   root / "beast" / "rex-exp.xml",

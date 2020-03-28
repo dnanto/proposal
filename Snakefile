@@ -5,7 +5,6 @@ include: "rules/common.smk"
 rule all:
     input:
         target_extract,
-        target_phylo,
         target_beautify
 
 ## modules ##

@@ -22,21 +22,25 @@ properties:
     description: "the task to execute: blastn, blastn-short, dc-megablast, megablast, rmblastn"
     default: blastn
   perc_identity:
-    type: number
+    type: integer
     description: the percent identity in [0, 100]
     default: 95
   qcov_hsp_perc:
-    type: number
+    type: integer
     description: the percent query coverage per hsp in [0, 100]
     default: 95
   qcov_per_iden:
-    type: number
+    type: integer
     description: the percent query coverage identity [0, 100]
     default: 95
   max_target_seqs:
     type: integer
     description: the maximum number of aligned sequences to keep
     default: 20000
+  alpha:
+    type: number
+    description: the q values threshold for strict clock outlier identification
+    default: 0.20
   email:
     type: string
     description: the e-mail to identify yourself to NCBI (for politeness reasons)

@@ -1,7 +1,7 @@
 rule beautify:
   input:
-    root / "msa.fna",
-    root / "phy" / "run.log"
+    root / "phy" / "msa-2.fna",
+    root / "phy" / "run-2.log"
   output:
     target_beautify
   params:

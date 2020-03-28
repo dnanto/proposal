@@ -1,5 +1,6 @@
 dependencies:
   - r::r-knitr
+  - r::r-pacman 
   - r::r-foreach
   - r::r-tracerer
   - r::r-tidyverse

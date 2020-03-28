@@ -63,6 +63,7 @@ rule feature:
       keys = ("accessionversion", "title", "taxid", "collection_date")
       getter = itemgetter(*keys)
       print(*keys, sep = "\t", file = file2)
+      # filter query coverage identity
       subjects = (
           row["subject id"] for row in parse_outfmt7(file1) 
           if float(row["% identity"]) > params.qcov_per_iden
@@ -100,6 +101,6 @@ rule extract:
       for key, val in sorted(data.items(), key=lambda item: meta[item[0]][0]):
         start, end = int(val['s. start']), int(val['s. end'])
         rec = idx[key][start-1:end]
-        rec.id = f"{val['subject id']}:{start}-{end}|{'|'.join(meta[key])}"
+        rec.id = f"{val['subject id']}|{'|'.join(meta[key])}"
         rec.description = ""
         SeqIO.write(rec, file, "fasta")
