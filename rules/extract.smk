@@ -34,7 +34,7 @@ rule entry:
     conda:
       "../envs/bio.yml"
     shell:
-        """./scripts/contextify.awk {input:q} | uniq | blastdbcmd -db {params:q} -entry_batch - | sed -E 's/:c?[0-9]*-.*//g' > {output:q};"""
+        """awk -f ./scripts/contextify.awk {input:q} | uniq | blastdbcmd -db {params:q} -entry_batch - | sed -E 's/:c?[0-9]*-.*//g' > {output:q};"""
 
 rule glocal:
     input:

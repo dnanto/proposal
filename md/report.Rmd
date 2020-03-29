@@ -53,6 +53,7 @@ df.mle <-
 pburn <- 0.1
 df.ess <-
   list.files(params$root, pattern = "\\w+-\\w+.log", recursive = T, full.names = T) %>%
+  grep("(msa|run)-(1|2).log$", ., invert = T, value = T) %>%
   mclapply(function(path) {
     df <- parse_beast_log(path)
     interval <- df$state[2] - df$state[1]
@@ -67,55 +68,16 @@ df.ess <-
 
 ```{r}
 df <- merge(df.mle, df.ess, by = c("acc", "clock", "coalescent"), sort = F)
+df.top <- group_by(df, acc) %>% top_n(1, `BF (PS)`)
 df
 ```
 
 ```{r, fig.width=10, fig.height=4}
-tree <-
-  with(df.top, file.path(params$root, "ACU57010", "beast", str_interp("rln-con.mcc.tree"))) %>%
-  treeio::read.beast()
-
+tree <- treeio::read.beast(file.path(params$root, "ACU57010", "beast", "rln-con.mcc.tree"))
 tip.date <- str_extract(tree@phylo$tip.label, "\\d{4}-\\d{2}-\\d{2}")
 mrsd <- min(tip.date)
-
 ggtree(tree, mrsd = mrsd, right = T) +
-  geom_tiplab(size = 2, linesize = 0.25, align = T) +
-  geom_range(range = "height_0.95_HPD", color = "blue", alpha = 0.5, size = 1) +
-  theme_tree2() +
-  theme(
-    panel.grid.major.x = element_line(color="black", size = .25),
-    panel.grid.minor.x = element_line(color="grey", size = .25)
-  )
-```
-
-```{r, fig.width=10, fig.height=4}
-tree <-
-  with(df.top, file.path(params$root, "ACU57015", "beast", str_interp("str-con.mcc.tree"))) %>%
-  treeio::read.beast()
-
-tip.date <- str_extract(tree@phylo$tip.label, "\\d{4}-\\d{2}-\\d{2}")
-mrsd <- min(tip.date)
-
-ggtree(tree, mrsd = mrsd, right = T) +
-  geom_tiplab(size = 2, linesize = 0.25, align = T) +
-  geom_range(range = "height_0.95_HPD", color = "blue", alpha = 0.5, size = 1) +
-  theme_tree2() +
-  theme(
-    panel.grid.major.x = element_line(color="black", size = .25),
-    panel.grid.minor.x = element_line(color="grey", size = .25)
-  )
-```
-
-```{r, fig.width=10, fig.height=4}
-tree <-
-  with(df.top, file.path(params$root, "ACU57030", "beast", str_interp("str-con.mcc.tree"))) %>%
-  treeio::read.beast()
-
-tip.date <- str_extract(tree@phylo$tip.label, "\\d{4}-\\d{2}-\\d{2}")
-mrsd <- min(tip.date)
-
-ggtree(tree, mrsd = mrsd, right = T) +
-  geom_tiplab(size = 2, linesize = 0.25, align = T) +
+  geom_tiplab(linesize = 0.25, align = T) +
   geom_range(range = "height_0.95_HPD", color = "blue", alpha = 0.5, size = 1) +
   theme_tree2() +
   theme(
