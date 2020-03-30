@@ -12,10 +12,17 @@ out <- snakemake@output[[1]]
 
 tree <- read.tree(path1)
 date <- sampleYearsFromLabels(tree$tip.label, regex = "\\d{4}-\\d{2}-\\d{2}")
-tree <- ape::rtt(tree, date, ncpu = ncpu)
 slen <- ncol(read.dna(path2, format = "fasta", as.character = T))
 
-x <- capture.output(tsim <- dater(tree, date, slen, clock = "strict", ncpu = ncpu))
+chr <- ape::chronos(tree, model = "discrete", control = chronos.control(nb.rate.cat = 1))
+rate <- attr(chr, "rates")
+
+x <- capture.output(
+  tsim <- dater(
+    tree, date, slen, clock = "strict", 
+    omega0 = rate, numStartConditions = 0, ncpu = ncpu
+  )
+)
 x <- capture.output(tips <- outlierTips(tsim))
 
 writeLines(as.character(dplyr::pull(dplyr::filter(tips, q >= alpha), taxon)), out)

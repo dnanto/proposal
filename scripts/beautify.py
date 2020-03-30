@@ -147,12 +147,15 @@ def main(argv):
         # model
         soup.beast.insert(2, sub_model)
         soup.beast.insert(3, site_model)
-        for ele in list(operators.children):
-            soup.beast.operators.append(ele)
-        for ele in list(prior.children):
-            soup.beast.mcmc.joint.prior.append(ele)
-        for ele in list(log.children):
-            soup.select_one("#fileLog").append(ele)
+        if model.has_attr("operators"):
+            for ele in list(operators.children):
+                soup.beast.operators.append(ele)
+        if model.has_attr("prior"):
+            for ele in list(prior.children):
+                soup.beast.mcmc.joint.prior.append(ele)
+        if model.has_attr("log"):
+            for ele in list(log.children):
+                soup.select_one("#fileLog").append(ele)
         if "+G" in args.model:
             gammaize(soup)
         if "+I" in args.model:
