@@ -21,7 +21,7 @@ rule outlier:
     root / "phy" / "run-1.treefile",
     root / "phy" / "msa-1.fna"
   output:
-    root / "phy" / "run-1.txt"
+    root / "phy" / "acc.txt"
   params:
     config["alpha"],
     config["cpu"]
@@ -33,7 +33,7 @@ rule outlier:
 rule rephy:
   input:
     root / "reg.fna",
-    root / "phy" / "run-1.txt"
+    root / "phy" / "acc.txt"
   output:
     root / "reg.fna.fai",
     root / "phy" / "msa-2.fna",
@@ -42,6 +42,8 @@ rule rephy:
   params:
     config["cpu"],
     root / "phy" / "run-2"
+  conda:
+    "../envs/bio.yml"
   shell:
     """
       rm -f {output[0]:q} && sed 's/_/|/g' {input[1]:q} | samtools faidx -r - {input[0]:q} | \
