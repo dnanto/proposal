@@ -18,11 +18,11 @@ rule phy:
     root / "phylo" / "msa.fna"
   output:
     root / "phylo" / "phy.treefile"
-  conda:
-    "../envs/bio.yml"
   params:
     root / "phylo" / "phy",
     config["cpu"]
+  conda:
+    "../envs/bio.yml"
   shell:
     """
       rm -f {params[0]:q}.* && iqtree -s {input[0]:q} -pre {params[0]:q} -alrt 1000 -bb 1000 -bnni -nt {params[1]:q} > /dev/null;
@@ -36,6 +36,8 @@ rule cfml:
     root / "phylo" / "cfml.log"
   params:
     root / "phylo" / "cfml"
+  conda:
+    "../envs/bio.yml"
   shell:
     """ClonalFrameML {input[0]:q} {input[1]:q} {params[0]:q} -embranch true > {output[0]:q}"""
 
