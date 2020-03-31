@@ -1,4 +1,4 @@
-#!/usr/bin/env RScript
+#!/usr/bin/env Rscript
 
 hush <- function(expr) { suppressPackageStartupMessages(suppressMessages(suppressWarnings(expr))) }
 
