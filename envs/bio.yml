@@ -1,9 +1,10 @@
 dependencies:
-  - bioconda::snakemake-minimal 
+  # - conda-forge::lxml
+  - conda-forge::biopython
+  # - anaconda::beautifulsoup4
   - bioconda::blast=2.9.0
-  - biobuilds::fasta=36.3.8e
   - bioconda::mafft=7.455
   - bioconda::iqtree=1.6.12
-  - anaconda::beautifulsoup4
-  - conda-forge::lxml
-  - conda-forge::biopython
+  - bioconda::clonalframeml=1.12
+  # - bioconda::snakemake-minimal 
+  - biobuilds::fasta=36.3.8e

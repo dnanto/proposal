@@ -18,16 +18,6 @@ validate(config, "../conf/schema.yml")
 
 root = Path(config["out"]) / Path(config["qry"]).stem
 
-target_extract = root / "reg.fna"
-target_beautify = (
-  root / "beast" / "rex-con.xml",
-  root / "beast" / "rex-exp.xml",
-  root / "beast" / "rln-con.xml",
-  root / "beast" / "rln-exp.xml",
-  root / "beast" / "str-con.xml",
-  root / "beast" / "str-exp.xml"
-)
-
 ## functions ##
 
 def batchify(entries, size=10):

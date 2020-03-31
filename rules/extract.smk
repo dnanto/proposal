@@ -4,7 +4,7 @@ rule query:
   output:
     root / "qry.fna"
   shell:
-    'cp "{input}" "{output}"'
+    'cp "{input[0]:q}" "{output[0]:q}"'
 
 rule local:
   input: 
@@ -34,7 +34,7 @@ rule entry:
     conda:
       "../envs/bio.yml"
     shell:
-        """awk -f ./scripts/contextify.awk {input:q} | uniq | blastdbcmd -db {params:q} -entry_batch - | sed -E 's/:c?[0-9]*-.*//g' > {output:q};"""
+        """awk -f ./scripts/contextify.awk {input[0]:q} | uniq | blastdbcmd -db {params[0]:q} -entry_batch - | sed -E 's/:c?[0-9]*-.*//g' > {output[0]:q};"""
 
 rule glocal:
     input:
@@ -47,7 +47,7 @@ rule glocal:
     conda:
       "../envs/bio.yml"
     shell:
-      'glsearch36 -m 8CB -T {params[0]:q} {input[0]:q} {input[1]:q} > {output:q};'
+      'glsearch36 -m 8CB -T {params[0]:q} {input[0]:q} {input[1]:q} > {output[0]:q};'
 
 rule feature:
   input:
@@ -80,7 +80,7 @@ rule extract:
     root / "glb.tsv",
     root / "lib.fna"
   output:
-    target_extract
+    root / "reg.fna"
   run:
     # keep accessions with collection_date
     with open(input[0]) as file:
@@ -101,6 +101,6 @@ rule extract:
       for key, val in sorted(data.items(), key=lambda item: meta[item[0]][0]):
         start, end = int(val['s. start']), int(val['s. end'])
         rec = idx[key][start-1:end]
-        rec.id = f"{val['subject id']}|{'|'.join(meta[key])}"
+        rec.id = f"{val['subject id']}_{'_'.join(meta[key])}"
         rec.description = ""
         SeqIO.write(rec, file, "fasta")
