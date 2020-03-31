@@ -1,4 +1,5 @@
 dependencies:
+  - r::r-coda
   - r::r-knitr
   - r::r-pacman 
   - r::r-foreach
