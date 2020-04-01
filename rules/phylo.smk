@@ -10,7 +10,7 @@ rule msa:
     "../envs/bio.yml"
   shell:
     """
-      mafft --auto --adjustdirection --thread {params[0]:q} {input[0]:q} > {output[0]:q} 2> {output[1]:q};
+      sed '/^>/ s/ .*//' {input[0]:q} | mafft --auto --adjustdirection --thread {params[0]:q} - > {output[0]:q} 2> {output[1]:q};
     """
 
 rule phy:
@@ -41,16 +41,28 @@ rule cfml:
   shell:
     """ClonalFrameML {input[0]:q} {input[1]:q} {params[0]:q} -embranch true > {output[0]:q}"""
 
-rule mcmc:
+rule mcmc_str:
   input:
     root / "phylo" / "cfml.log"
   output:
-    root / "phylo" / "clock.poi.rds",
-    root / "phylo" / "clock.rga.rds"
+    root / "phylo" / "clock.str.rds"
   params:
-    root / "phylo" / "clock",
-    config["mcmc"]
+    config["iter"],
+    config["thin"],
   conda:
     "../envs/R.yml"
   shell:
-    "./scripts/bactdate.R {input} {params[0]} {params[1]}"
+    './scripts/bactdate.R {input:q} "poisson" {params[0]:q} {params[1]:q} {output[0]:q}'
+
+rule mcmc_rlx:
+  input:
+    root / "phylo" / "cfml.log"
+  output:
+    root / "phylo" / "clock.rlx.rds"
+  params:
+    config["iter"],
+    config["thin"],
+  conda:
+    "../envs/R.yml"
+  shell:
+    './scripts/bactdate.R {input:q} "relaxedgamma" {params[0]:q} {params[1]:q} {output[0]:q}'

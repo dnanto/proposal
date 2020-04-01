@@ -1,12 +1,14 @@
 import json
 from csv import DictReader
 from datetime import datetime
+from itertools import chain
 from operator import itemgetter
 from pathlib import Path
+from shutil import copy2
+from subprocess import DEVNULL, PIPE, Popen, run
 
 from Bio import Entrez, SeqIO
 from snakemake.utils import validate
-
 
 ## setup ##
 
@@ -19,6 +21,11 @@ validate(config, "../conf/schema.yml")
 root = Path(config["out"]) / Path(config["qry"]).stem
 
 ## functions ##
+
+def argify(conf, pfx="-"):
+    arr = (ele.split("=", maxsplit = 1) for ele in conf)
+    arr = ((pfx + ele[0], ele[1]) for ele in arr)
+    return chain.from_iterable(arr)
 
 def batchify(entries, size=10):
     batch = []
@@ -39,20 +46,14 @@ def parse_outfmt7(file):
         elif line and not line.startswith("#"):
             yield dict(zip(fields, line.split("\t")))
 
-def process_esummary(file):
-    obj = json.load(file)["result"]
-    keys = ("accessionversion", "title", "taxid", "subtype", "subname")
-    getter = itemgetter(*keys)
-    for key in obj["uids"]:
-        val = obj[key]
-        row = dict((
-            *zip(keys, getter(val)),
-            *zip(val["subtype"].split("|"), val["subname"].split("|"))
-        ))
-        del row["subtype"], row["subname"]
-        yield row
+def contextify(row):
+    flank1, flank2 = int(row["q. start"]) - 1, int(row["query length"]) - int(row["q. end"])
+    sstart, send, sstrand = int(row["s. start"]), int(row["s. end"]), row["subject strand"]
+    sstart, send = (sstart - flank1, send + flank2) if sstrand == "plus" else (send - flank2, sstart + flank1)
+    sstart = 1 if sstart < 1 else sstart
+    return f'{row["subject acc.ver"]} {sstart}-{send} {sstrand}'
 
-def normalize_date(val, formats, to_fmt = "%Y-%m-%d", na_val = "NA"):
+def normalize_date(val, formats, to_fmt = "%Y-%m-%d", na_val = None):
     result = na_val
     for fmt in formats:
         try:
@@ -62,3 +63,10 @@ def normalize_date(val, formats, to_fmt = "%Y-%m-%d", na_val = "NA"):
         if result != na_val:
             break
     return result
+
+def process_esummary(obj):
+    obj = obj["result"]
+    for key in obj["uids"]:
+        val = obj[key]
+        meta = dict(zip(val["subtype"].split("|"), val["subname"].split("|")))
+        yield val["accessionversion"], { **val, **meta }

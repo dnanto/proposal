@@ -4,8 +4,8 @@ include: "rules/common.smk"
 
 rule all:
   input:
-    root / "phylo" / "clock.poi.rds",
-    root / "phylo" / "clock.rga.rds"
+    root / "phylo" / "clock.str.rds",
+    root / "phylo" / "clock.rlx.rds"
 
 ## modules ##
 

@@ -3,104 +3,98 @@ rule query:
     config["qry"]
   output:
     root / "qry.fna"
-  shell:
-    'cp "{input[0]:q}" "{output[0]:q}"'
+  run:
+    copy2(input[0], output[0])
 
 rule local:
-  input: 
-    root / "qry.fna"
+  input:
+    config["qry"]
   output:
     root / "lcl.tsv"
   params:
     **config
-  conda:
-    "../envs/bio.yml"
-  shell:    
-    """
-      blastn \
-        -task {params.task:q} -db {params.db:q} -query {input:q} -out {output:q} -outfmt "7 std sstrand qlen" \
-        -perc_identity {params.perc_identity:q} -qcov_hsp_perc {params.qcov_hsp_perc:q} \
-        -max_target_seqs {params.max_target_seqs:q} -num_threads {params.cpu:q} \
-        ;
-    """
+  run:
+    cmd = (
+      "blastn", "-db", params.db, "-query", input[0], "-out", output[0], 
+      "-outfmt", "7 std sstrand qlen", "-num_threads", str(params.cpu), *argify(params.blast)
+    )
+    print(*cmd)
+    run(cmd)
 
 rule entry:
-    input:
-        root / "lcl.tsv"
-    output:
-        root / "lib.fna"
-    params:
-        config["db"]
-    conda:
-      "../envs/bio.yml"
-    shell:
-        """awk -f ./scripts/contextify.awk {input[0]:q} | uniq | blastdbcmd -db {params[0]:q} -entry_batch - | sed -E 's/:c?[0-9]*-.*//g' > {output[0]:q};"""
+  input:
+    root / "lcl.tsv"
+  output:
+    root / "lib.fna"
+  params:
+    config["db"]
+  run:
+    cmd = ("blastdbcmd", "-db", params[0], "-entry_batch", "-")
+    print(*cmd)
+    with open(input[0]) as file1, open(output[0], "w") as file2:
+      with Popen(cmd, stdin=PIPE, stdout=PIPE, universal_newlines=True) as proc:
+        with proc.stdin as file:
+          print(*map(contextify, parse_outfmt7(file1)), sep="\n", file = file)
+        with proc.stdout as file:
+          for rec in SeqIO.parse(file, "fasta"):
+            rec.description = rec.description[len(rec.id)+1:]
+            rec.id = rec.id.split(":", maxsplit = 1)[0]
+            SeqIO.write(rec, file2, "fasta")
 
 rule glocal:
     input:
       config["qry"],
       root / "lib.fna"
     output:
-      root / "glb.tsv"
+      root / "glc.tsv"
     params:
       config["cpu"]
-    conda:
-      "../envs/bio.yml"
-    shell:
-      'glsearch36 -m 8CB -T {params[0]:q} {input[0]:q} {input[1]:q} > {output[0]:q};'
+    run:
+      cmd = ("glsearch36", "-m", "8CB", "-T", str(params[0]), "-O", output[0], input[0], input[1])
+      print(*cmd)
+      run(cmd, stdout = DEVNULL)
 
 rule feature:
   input:
-    root / "glb.tsv"
+    root / "glc.tsv"
   output:
-    root / "src.tsv"
+    root / "src.json"
   params:
     **config
   run:
     Entrez.email = params.email
     with open(input[0]) as file1, open(output[0], "w") as file2:
-      key = "collection_date"
-      keys = ("accessionversion", "title", "taxid", "collection_date")
-      getter = itemgetter(*keys)
-      print(*keys, sep = "\t", file = file2)
-      # filter query coverage identity
-      subjects = (
-          row["subject id"] for row in parse_outfmt7(file1) 
-          if float(row["% identity"]) > params.qcov_per_iden
-      )
-      for batch in batchify(subjects, size=params.post_size):
-          with Entrez.esummary(db=params.edb, id=",".join(batch), retmode="json") as handle:
-              for row in process_esummary(handle):
-                  row[key] = normalize_date(row.get(key), params.formats)
-                  print(*getter(row), sep = "\t", file = file2)
+      for batch in batchify(map(itemgetter("subject id"), parse_outfmt7(file1)), size=params.post_size):
+        with Entrez.esummary(db=params.edb, id=",".join(batch), retmode="json") as handle:
+          file2.write(handle.read())
 
 rule extract:
   input:
-    root / "src.tsv",
-    root / "glb.tsv",
-    root / "lib.fna"
+    root / "lib.fna",
+    root / "glc.tsv",
+    root / "src.json"
   output:
     root / "reg.fna"
+  params:
+    config["qcov_idn_perc"],
+    config["formats"]
   run:
-    # keep accessions with collection_date
-    with open(input[0]) as file:
-      getter = itemgetter("accessionversion", "collection_date", "taxid")
-      reader = DictReader(file, delimiter="\t")
-      meta = { ele[0]: ele[1:] for ele in map(getter, reader) if ele[1] != "NA" }
-    data = {}
-    # keep first entry for each accession
+    # index library
+    idx = SeqIO.index_db(":memory:", input[0], "fasta")
+    # load metadata
+    with open(input[2]) as file:
+      meta = dict(process_esummary(json.load(file)))
+      date = { k: normalize_date(v.get("collection_date"), params[1]) for k, v in meta.items() }
+    # filter records
+    rec = {}
     with open(input[1]) as file:
       for row in parse_outfmt7(file):
         key = row["subject id"]
-        if key in meta:
-          data[key] = data.get(key, row)
-    # index library
-    idx = SeqIO.index_db(":memory:", input[2], "fasta")
+        if key not in rec and float(row["% identity"]) >= params[0] and date[key]:
+          start, end = int(row["s. start"]), int(row["s. end"])
+          val = idx[key][start-1:end]
+          val.description = val.description[len(val.id)+1:]
+          val.id = f"{key}_{date[key]}_{meta[key]['taxid']}"
+          rec[key] = val
     # output extract
-    with open(output[0], "w") as file:
-      for key, val in sorted(data.items(), key=lambda item: meta[item[0]][0]):
-        start, end = int(val['s. start']), int(val['s. end'])
-        rec = idx[key][start-1:end]
-        rec.id = f"{val['subject id']}_{'_'.join(meta[key])}"
-        rec.description = ""
-        SeqIO.write(rec, file, "fasta")
+    SeqIO.write(rec.values(), output[0], "fasta")

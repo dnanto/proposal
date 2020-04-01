@@ -17,30 +17,18 @@ properties:
     type: integer
     description: the number of CPUs to use
     default: 8
-  task:
-    type: string
-    description: "the task to execute: blastn, blastn-short, dc-megablast, megablast, rmblastn"
-    default: blastn
-  perc_identity:
-    type: integer
-    description: the percent identity in [0, 100]
-    default: 95
-  qcov_hsp_perc:
-    type: integer
-    description: the percent query coverage per hsp in [0, 100]
-    default: 95
-  qcov_per_iden:
+  blast:
+    type: array
+    description: the blast parameters
+    default:
+      - task=blastn
+      - perc_identity=90
+      - qcov_hsp_perc=90
+      - max_target_seqs=20000
+  qcov_idn_perc:
     type: integer
     description: the percent query coverage identity [0, 100]
     default: 95
-  max_target_seqs:
-    type: integer
-    description: the maximum number of aligned sequences to keep
-    default: 20000
-  alpha:
-    type: number
-    description: the q values threshold for strict clock outlier identification
-    default: 0.20
   email:
     type: string
     description: the e-mail to identify yourself to NCBI (for politeness reasons)
@@ -61,11 +49,11 @@ properties:
       - "%Y-%m-%d"
       - "%b-%Y"
       - "%Y"
-  mcmc:
+  iter:
     type: integer
-    description: the chain length for MCMC
+    description: the number of MCMC iterations to perform
     default: 1000000
-
-required:
-  - qry
-  - db
+  thin:
+    type: integer
+    description: the thining interval between recorded MCMC samples
+    default: 1000
