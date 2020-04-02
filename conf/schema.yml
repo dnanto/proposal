@@ -9,6 +9,10 @@ properties:
   db:
     type: string
     description: the BLAST database name
+  mode:
+    type: boolean
+    description: the flag to set processing mode (true = genome, false = gene)
+    default: false
   out:
     type: string
     description: the ouput directory
@@ -17,6 +21,10 @@ properties:
     type: integer
     description: the number of CPUs to use
     default: 8
+  plen:
+    type: number
+    description: the percentage range of the reference genome length to use for subsetting in [0, 100]
+    default: 5
   blast:
     type: array
     description: the blast parameters
@@ -26,9 +34,9 @@ properties:
       - qcov_hsp_perc=90
       - max_target_seqs=20000
   qcov_idn_perc:
-    type: integer
+    type: number
     description: the percent query coverage identity [0, 100]
-    default: 95
+    default: 90
   email:
     type: string
     description: the e-mail to identify yourself to NCBI (for politeness reasons)
@@ -56,4 +64,4 @@ properties:
   thin:
     type: integer
     description: the thining interval between recorded MCMC samples
-    default: 1000
+    default: 10

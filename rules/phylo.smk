@@ -1,6 +1,6 @@
 rule msa:
   input:
-    root / "reg.fna"
+    root / "ext.fna"
   output:
     root / "phylo" / "msa.fna",
     root / "phylo" / "msa.log",

@@ -1,5 +1,4 @@
 import json
-from csv import DictReader
 from datetime import datetime
 from itertools import chain
 from operator import itemgetter
@@ -10,7 +9,7 @@ from subprocess import DEVNULL, PIPE, Popen, run
 from Bio import Entrez, SeqIO
 from snakemake.utils import validate
 
-## setup ##
+## config ##
 
 report: "../report/workflow.rst"
 configfile: "conf/config.yml"
@@ -19,6 +18,10 @@ validate(config, "../conf/schema.yml")
 ## variables ##
 
 root = Path(config["out"]) / Path(config["qry"]).stem
+targets = [
+    root / "phylo" / "clock.str.rds",
+    root / "phylo" / "clock.rlx.rds"
+]
 
 ## functions ##
 
@@ -46,6 +49,13 @@ def parse_outfmt7(file):
         elif line and not line.startswith("#"):
             yield dict(zip(fields, line.split("\t")))
 
+def parse_coords(file):
+    next(file)
+    next(file)
+    next(file)
+    fields = (*next(file).split("\t"), "[R]", "[Q]")
+    yield from (dict(zip(fields, line.strip().split("\t"))) for line in file)
+
 def contextify(row):
     flank1, flank2 = int(row["q. start"]) - 1, int(row["query length"]) - int(row["q. end"])
     sstart, send, sstrand = int(row["s. start"]), int(row["s. end"]), row["subject strand"]
@@ -64,9 +74,18 @@ def normalize_date(val, formats, to_fmt = "%Y-%m-%d", na_val = None):
             break
     return result
 
+def jsons(file):
+    buffer = ""
+    for line in file:
+        buffer += line
+        if line.startswith("}"):
+            yield json.loads(buffer)
+            buffer = ""
+
 def process_esummary(obj):
     obj = obj["result"]
     for key in obj["uids"]:
         val = obj[key]
         meta = dict(zip(val["subtype"].split("|"), val["subname"].split("|")))
         yield val["accessionversion"], { **val, **meta }
+
