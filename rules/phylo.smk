@@ -2,8 +2,7 @@ rule msa:
   input:
     root / "ext.fna"
   output:
-    root / "phylo" / "msa.fna",
-    root / "phylo" / "msa.log",
+    root / "phylo" / "msa.fna"
   params:
     config["cpu"]
   conda:
@@ -12,6 +11,14 @@ rule msa:
     """
       sed '/^>/ s/ .*//' {input[0]:q} | mafft --auto --adjustdirection --thread {params[0]:q} - > {output[0]:q} 2> {output[1]:q};
     """
+
+rule snp:
+  input:
+    root / "phylo" / "msa.fna"
+  output:
+    root / "phylo" / "snp.vcf"
+  shell:
+    "snp-sites -v {input[0]:q} > {output[0]:q}"
 
 rule phy:
   input:

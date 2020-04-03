@@ -19,6 +19,7 @@ validate(config, "../conf/schema.yml")
 
 root = Path(config["out"]) / Path(config["qry"]).stem
 targets = [
+    root / "phylo" / "snp.vcf",
     root / "phylo" / "clock.str.rds",
     root / "phylo" / "clock.rlx.rds"
 ]
@@ -88,4 +89,3 @@ def process_esummary(obj):
         val = obj[key]
         meta = dict(zip(val["subtype"].split("|"), val["subname"].split("|")))
         yield val["accessionversion"], { **val, **meta }
-
