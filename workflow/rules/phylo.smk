@@ -17,6 +17,8 @@ rule snp:
     root / "phylo" / "msa.fna"
   output:
     root / "phylo" / "snp.vcf"
+  conda:
+    "../envs/bio.yml"
   shell:
     "snp-sites -v {input[0]:q} > {output[0]:q}"
 
@@ -54,7 +56,7 @@ rule mcmc_str:
     root / "phylo" / "clock.str.rds"
   params:
     config["iter"],
-    config["thin"],
+    config["thin"]
   conda:
     "../envs/R.yml"
   shell:
@@ -67,7 +69,7 @@ rule mcmc_rlx:
     root / "phylo" / "clock.rlx.rds"
   params:
     config["iter"],
-    config["thin"],
+    config["thin"]
   conda:
     "../envs/R.yml"
   shell:

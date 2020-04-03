@@ -12,7 +12,11 @@ properties:
   mode:
     type: boolean
     description: the flag to set processing mode (true = genome, false = gene)
-    default: false
+    default: False
+  pkg:
+    type: boolean
+    description: the flag to install R packages that aren't available on conda
+    default: False
   out:
     type: string
     description: the ouput directory

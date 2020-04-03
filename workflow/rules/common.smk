@@ -18,11 +18,16 @@ validate(config, "../conf/schema.yml")
 ## variables ##
 
 root = Path(config["out"]) / Path(config["qry"]).stem
+
 targets = [
     root / "phylo" / "snp.vcf",
     root / "phylo" / "clock.str.rds",
     root / "phylo" / "clock.rlx.rds"
 ]
+
+pkg_tmp = Path("pkg.tmp")
+pkg_tar = Path("pkg.txt")
+config.get("pkg") and pkg_tmp.touch()
 
 ## functions ##
 

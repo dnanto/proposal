@@ -6,7 +6,24 @@ rule all:
   input:
     targets
 
+rule all_pkg:
+  input:
+    pkg_tar,
+    pkg_tmp
+  run:
+    pkg_tmp.unlink()
+
 ## rule init ##
+
+rule pkg:
+  input:
+    pkg_tmp
+  output:
+    pkg_tar
+  conda:
+    "envs/R.yml"
+  shell:
+    "./workflow/scripts/pkg.R > {output[0]:q}"
 
 rule query:
   input:

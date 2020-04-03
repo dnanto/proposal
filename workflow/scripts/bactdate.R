@@ -2,8 +2,6 @@
 
 hush <- function(expr) { suppressPackageStartupMessages(suppressMessages(suppressWarnings(expr))) }
 
-if (!pacman::p_isinstalled(BactDating)) pacman::p_install_gh("xavierdidelot/BactDating")
-
 hush(library(lubridate))
 hush(library(tidyverse))
 hush(library(BactDating))

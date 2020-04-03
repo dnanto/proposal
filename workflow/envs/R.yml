@@ -1,9 +1,5 @@
 dependencies:
-  - r::r-coda
-  - r::r-knitr
-  - r::r-pacman 
-  - r::r-foreach
-  - r::r-tracerer
   - r::r-tidyverse
   - r::r-lubridate
-  - bioconda::bioconductor-ggtree 
+  - r::r-devtools
+  - conda-forge::r-ape
