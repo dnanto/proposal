@@ -7,5 +7,7 @@ env
 data
 dag.*
 out
+thesis/_*/
+thesis/*.html
 workflow/envs/bio
 workflow/envs/R
