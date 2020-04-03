@@ -7,5 +7,5 @@ env
 data
 dag.*
 out
-envs/bio
-envs/R
+workflow/envs/bio
+workflow/envs/R

@@ -2,15 +2,15 @@ rule msa:
   input:
     root / "ext.fna"
   output:
-    root / "phylo" / "msa.fna"
+    root / "phylo" / "msa.fna",
+    root / "phylo" / "msa.log"
   params:
     config["cpu"]
   conda:
     "../envs/bio.yml"
   shell:
-    """
-      sed '/^>/ s/ .*//' {input[0]:q} | mafft --auto --adjustdirection --thread {params[0]:q} - > {output[0]:q} 2> {output[1]:q};
-    """
+    "sed '/^>/ s/ .*//' {input[0]:q} | "
+    "mafft --auto --adjustdirection --thread {params[0]:q} - > {output[0]:q} 2> {output[1]:q}"
 
 rule snp:
   input:
@@ -31,9 +31,8 @@ rule phy:
   conda:
     "../envs/bio.yml"
   shell:
-    """
-      rm -f {params[0]:q}.* && iqtree -s {input[0]:q} -pre {params[0]:q} -alrt 1000 -bb 1000 -bnni -nt {params[1]:q} > /dev/null;
-    """
+    "rm -f {params[0]:q}.* && "
+    "iqtree -s {input[0]:q} -pre {params[0]:q} -alrt 1000 -bb 1000 -bnni -nt {params[1]:q} > /dev/null;"
 
 rule cfml:
   input:
@@ -46,7 +45,7 @@ rule cfml:
   conda:
     "../envs/bio.yml"
   shell:
-    """ClonalFrameML {input[0]:q} {input[1]:q} {params[0]:q} -embranch true > {output[0]:q}"""
+    "ClonalFrameML {input[0]:q} {input[1]:q} {params[0]:q} -embranch true > {output[0]:q}"
 
 rule mcmc_str:
   input:
@@ -59,7 +58,7 @@ rule mcmc_str:
   conda:
     "../envs/R.yml"
   shell:
-    './scripts/bactdate.R {input:q} "poisson" {params[0]:q} {params[1]:q} {output[0]:q}'
+    "workflow/scripts/bactdate.R {input:q} poisson {params[0]:q} {params[1]:q} {output[0]:q}"
 
 rule mcmc_rlx:
   input:
@@ -72,4 +71,4 @@ rule mcmc_rlx:
   conda:
     "../envs/R.yml"
   shell:
-    './scripts/bactdate.R {input:q} "relaxedgamma" {params[0]:q} {params[1]:q} {output[0]:q}'
+    "workflow/scripts/bactdate.R {input:q} relaxedgamma {params[0]:q} {params[1]:q} {output[0]:q}"

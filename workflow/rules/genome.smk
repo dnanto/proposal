@@ -44,4 +44,4 @@ rule coords:
   conda:
     "../envs/bio.yml"
   shell:
-    'show-coords -c -d -l -q -T {input[0]:q} > {output[0]:q}'
+    "show-coords -c -d -l -q -T {input[0]:q} > {output[0]:q}"

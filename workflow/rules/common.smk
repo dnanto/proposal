@@ -12,7 +12,7 @@ from snakemake.utils import validate
 ## config ##
 
 report: "../report/workflow.rst"
-configfile: "conf/config.yml"
+configfile: "workflow/conf/config.yml"
 validate(config, "../conf/schema.yml")
 
 ## variables ##

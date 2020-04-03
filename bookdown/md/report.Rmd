@@ -72,16 +72,25 @@ df.top <- group_by(df, acc) %>% top_n(1, `BF (PS)`)
 df
 ```
 
+```{r}
+plot_beast_tree <- function(path)
+{
+  tree <- treeio::read.beast(path)
+  tip.date <- str_extract(tree@phylo$tip.label, "\\d{4}-\\d{2}-\\d{2}")
+  mrsd <- min(tip.date)
+  ggtree(tree, mrsd = mrsd, right = T) +
+    geom_tiplab(linesize = 0.25, align = T) +
+    geom_range(range = "height_0.95_HPD", color = "blue", alpha = 0.5, size = 1) +
+    theme_tree2() +
+    theme(
+      panel.grid.major.x = element_line(color="black", size = .25),
+      panel.grid.minor.x = element_line(color="grey", size = .25)
+    )
+}
+```
+
+
 ```{r, fig.width=10, fig.height=4}
-tree <- treeio::read.beast(file.path(params$root, "ACU57010", "beast", "rln-con.mcc.tree"))
-tip.date <- str_extract(tree@phylo$tip.label, "\\d{4}-\\d{2}-\\d{2}")
-mrsd <- min(tip.date)
-ggtree(tree, mrsd = mrsd, right = T) +
-  geom_tiplab(linesize = 0.25, align = T) +
-  geom_range(range = "height_0.95_HPD", color = "blue", alpha = 0.5, size = 1) +
-  theme_tree2() +
-  theme(
-    panel.grid.major.x = element_line(color="black", size = .25),
-    panel.grid.minor.x = element_line(color="grey", size = .25)
-  )
+with(df.top, file.path(params$root, acc, "beast", str_c(str_c(clock, coalescent, sep = "-"), "mcc.tree", sep = "."))) %>%
+  lapply(plot_beast_tree)
 ```
