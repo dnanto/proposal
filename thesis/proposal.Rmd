@@ -1,7 +1,10 @@
 # Proposal {.unnumbered}
 
+## Introduction {.unnumbered}
+
+This research relies on molecular clock methods to estimate substitution rates and divergence times in *Human adenovirus* samples. This requires a highly curated data set of homologous nucleic acid sequences with collection date time-stamps to represent a measurably evolving population [@drummondMeasurablyEvolvingPopulations2003]. Manual execution of this workflow becomes intractable as the number of samples increases. The presence of heterogeneous or ambiguous date formats adds another time sink. This research defines a generic workflow and automated, parallel pipeline that coordinates the execution in a reproducible manner.
+
 ## Methods {.unnumbered}
 
-This research relies on molecular clock methods to estimate substitution rates and divergence times in *Human adenovirus* samples. This requires a highly curated data set of homologous nucleic acid sequences with collection date time-stamps to represent a measurably evolving population [@drummondMeasurablyEvolvingPopulations2003]. Manual execution of this workflow becomes intractable as the number of samples increases. The presence of heterogeneous or ambiguous date formats is another time sink. In addition, the overall workflow involves many parameters that require tracking. Consequently, this research defines a workflow and automated pipeline that coordinates the execution in a reproducible manner.
 
 ## References {.unnumbered}
