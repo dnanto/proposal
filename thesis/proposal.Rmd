@@ -8,7 +8,8 @@ This research relies on molecular clock methods to estimate substitution rates a
 
 This section documents an executable pipeline that constructs data sets for molecular clock analysis. The solution relies on Snakemake, which is a portable, rule-based workflow engine [@kosterSnakemakeScalableBioinformatics2012]. Configurable rules define jobs that can optionally run within environments defined with the Conda package manager. The engine automatically infers the workflow execution path and parallelization based on input dependencies, creating a directed acyclic graph [@kosterSnakemakeScalableBioinformatics2012]. Accordingly, the engine guarantees the reproducibility of each step.
 
+### Phase 1: Homology Search {.unnumbered}
 
-
+The first phase uses a query sequence to generate a set of homologous sequences. The execution has two paths to process genes and genomes separately. For a gene, the initial rule runs the `blastn` program of the BLAST suite to perform local alignment and generate a library of sequences. The next rule runs the `glsearch36` program of the FASTA suite to perform global/local alignment, thereby guaranteeing full query coverage. For a genome, the initial rule runs the `blastdbcmd` program to subset the BLAST database by sequence length, accepting those within a percentage deviation of expected size. The next rule runs the `nucmer` program of the MUMmer genome alignment suite. The result from each path generates query coverage identity scores to subsequently filter the sequences into a homologous set.
 
 ## References {.unnumbered}
