@@ -8,8 +8,18 @@ This research relies on molecular clock methods to estimate substitution rates a
 
 This section documents an executable pipeline that constructs data sets for molecular clock analysis. The solution relies on Snakemake, which is a portable, rule-based workflow engine [@kosterSnakemakeScalableBioinformatics2012]. Configurable rules define jobs that can optionally run within environments defined with the Conda package manager. The engine automatically infers the workflow execution path and parallelization based on input dependencies, creating a directed acyclic graph [@kosterSnakemakeScalableBioinformatics2012]. Accordingly, the engine guarantees the reproducibility of each step.
 
-### Phase 1: Homology Search {.unnumbered}
+### Phase 1: Data Set Generation {.unnumbered}
 
-The first phase uses a query sequence to generate a set of homologous sequences. The execution has two paths to process genes and genomes separately. For a gene, the initial rule runs the `blastn` program of the BLAST suite to perform local alignment and generate a library of sequences. The next rule runs the `glsearch36` program of the FASTA suite to perform global/local alignment, thereby guaranteeing full query coverage. For a genome, the initial rule runs the `blastdbcmd` program to subset the BLAST database by sequence length, accepting those within a percentage deviation of expected size. The next rule runs the `nucmer` program of the MUMmer genome alignment suite. The result from each path generates query coverage identity scores to subsequently filter the sequences into a homologous set.
+The first phase uses a query sequence to generate a set of timestamped, homologous sequences. The execution has two initial paths to process genes and genomes separately. For a gene, the first rule runs the BLAST+ `blastn` program to perform local alignment and generate a library of sequences. The next rule runs the FASTA `glsearch36` program to perform global/local alignment, thereby guaranteeing full query coverage. For a genome, the first rule runs the BLAST+ `blastdbcmd` program to subset the BLAST database by sequence length, accepting those within a percentage deviation of expected size. The next rule runs the `nucmer` and `show-coords` programs of the MUMmer genome alignment suite. Each path generates a report of query coverage identity scores.
+
+The next rule defines a Python program that extracts the accessions from the report. It uses an Entrez Direct binding of the `esummary` utility to query GenBank and download a JSON file of the metadata. The final rule processes the JSON file and query coverage identity report. It extracts the "collection_date" qualifier and attempts to normalize it into an ISO-8601 string from a list of formats. The rule then accepts sequences based on an identity threshold and successful date extraction.
+
+### Phase 2: Phylogenetic Analyses {.unnumbered}
+
+The next phase performs phylogenetic analyses on the generated data set. The initial rule runs the multithreaded `mafft` program to generate a multiple sequence alignment. This program calculates a fast Fourier transform to cluster and progressively align the sequences [@katohMAFFTNovelMethod2002a]. It also automatically sets the optimal program execution mode based on input size and reverse complements any sequence if necessary [@katohMAFFTNovelMethod2002a].
+
+Another rule runs the `iqtree` program to infer an initial maximum-likelihood tree [@nguyenIQTREEFastEffective2015a]. The program initially calculates the best substitution model based on the Bayesian information criterion [@kalyaanamoorthyModelFinderFastModel2017a]. The "-alrt" and "-bb" flags to set the number of bootstrap replicates to 1,000 for the approximate likelihood ratio test of branches and branch support [@anisimovaSurveyBranchSupport2011a; @hoangUFBoot2ImprovingUltrafast2018a]. The "-bnni" flag also reduces the risk of model violations associated with ultra-fast bootstrap testing via nearest neighbor interchange. The program outputs a log file and exports the tree in Newick format.
+
+
 
 ## References {.unnumbered}
