@@ -1,34 +1,27 @@
 ---
-author: 'Daniel Antonio Negrón'
+author: "Daniel Antonio Negrón"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
-institution: 'George Mason University'
-division: 'College of Science'
-advisor: 'Don Seto, PhD'
-# If you have more two advisors, un-silence line 7
-altadvisor: 'Patrick Gillevet, PhD; Sterling Thomas, PhD'
-department: 'School of Systems Biology'
-degree: 'Bachelor of Arts'
-title: 'Molecular Clock analysis of <i>Human adenovirus</i>'
+institution: "George Mason University"
+division: "College of Science"
+advisor: "Don Seto, PhD"
+altadvisor: "Patrick Gillevet, PhD; Sterling Thomas, PhD"
+department: "School of Systems Biology"
+degree: "Doctor of Philosophy"
+title: "Molecular Clock analysis of <i>Human adenovirus</i>"
 knit: "bookdown::render_book"
 site: bookdown::bookdown_site
 output:
-  thesisdown::thesis_gitbook: default
-bibliography: bib/ref.bib
-csl: csl/apa.csl
+  thesisdown::thesis_gitbook: "default"
+bibliography: "bib/ref.bib"
+csl: "csl/apa.csl"
 lot: true
 lof: true
 ---
 
 ```{r include_packages, include = FALSE}
-# This chunk ensures that the thesisdown package is
-# installed and loaded. This thesisdown package includes
-# the template files for the thesis.
 if(!require(devtools))
   install.packages("devtools", repos = "http://cran.rstudio.com")
 if(!require(thesisdown))
   devtools::install_github("ismayc/thesisdown")
 library(thesisdown)
 ```
-
-# Abstract {.unnumbered}
-...
