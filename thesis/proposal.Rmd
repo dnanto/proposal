@@ -10,7 +10,7 @@ This section documents an executable pipeline that constructs data sets for mole
 
 ### Phase 1: Data Set Generation {.unnumbered}
 
-The first phase uses a query to generate a set of timestamped, homologous sequences. The execution has two initial paths to process genes and genomes separately. Both paths use different strategies to guarantee full alignment coverage of the query. For genes, the first rule runs the BLAST+ `blastn` program to perform local alignment and generate a library of sequences. The next rule runs the FASTA `glsearch36` program to perform global-local alignment. For genomes, the first rule runs the BLAST+ `blastdbcmd` program to subset the BLAST database by sequence length, accepting those within a percentage deviation of expected size. The next rule runs the `nucmer` and `show-coords` programs of the MUMmer genome alignment suite. Each path generates a report of query coverage identity scores.
+The first phase uses a query to generate a set of timestamped, homologous sequences. The execution has two initial paths to process genes and genomes separately. Both paths use different strategies to guarantee full alignment coverage of the query. For genes, the first rule runs the `BLAST+` `blastn` program to perform local alignment and generate a library of sequences. The next rule runs the `FASTA` `glsearch36` program to perform global-local alignment. For genomes, the first rule runs the BLAST+ `blastdbcmd` program to subset the BLAST database by sequence length, accepting those within a percentage deviation of expected size. The next rule runs the `nucmer` and `show-coords` programs of the `MUMmer` genome alignment suite. Each path generates a report of query coverage identity scores.
 
 The next rule defines a Python program that extracts the accessions from the report. It uses an Entrez Direct binding of the `esummary` utility to query GenBank and download a JSON file of the metadata. The final rule processes the JSON file and query coverage identity report. It extracts the "collection_date" qualifier and attempts to normalize it into an ISO-8601 string from a list of formats. The rule then accepts sequences based on an identity threshold and successful date extraction.
 
@@ -24,9 +24,14 @@ Tree inference occurs in a rule that runs the `iqtree` program to infer a maximu
 
 Recombination analysis occurs in a rule that runs the `ClonalFrameML` program. It improves upon the original `ClonalFrame` program by using maximum-likelihood estimation to identify recombinant regions based on the multiple sequence alignment and original tree [@didelotClonalFrameMLEfficientInference2015a; @didelotInferenceBacterialMicroevolution2007]. This step is necessary since recombination obscures temporal analysis [@didelotClonalFrameMLEfficientInference2015a; @rambautExploringTemporalStructure2016a]. Accordingly, the output is a tree based on the clonal frame, the portion of the sequence without recombination [@milkmanMolecularEvolutionEscherichia1990]. 
 
+Estimation of evolutionary rate and ancestral dates occurs in a rule that uses the `BactDating` R package. The `bactdate` function performs a Markov chain Monte Carlo simulation to estimate parameters for the strict and relaxed clock models [@didelotBayesianInferenceAncestral2018a]. This method considers the `ClonalFrameML` tree to correct for branch lengths affected by recombination [@didelotBayesianInferenceAncestral2018a].
 
+### Validation {.unnumbered}
+
+...
 
 ## Results {.unnumbered}
 
+...
 
 ## References {.unnumbered}
