@@ -6,28 +6,58 @@ code <- list(
 )
 
 muts <-
-  outer(c(names(code), "*"), c(names(code), "*"), paste) %>% 
-  as.character() %>% 
-  enframe(name = NULL, value = "mut") %>% 
-  separate(mut, c("REF", "ALT"), sep = " ") %>%
-  filter(REF != ALT & REF != "N" & ALT != "N") %>%
+  outer(c(names(code), "*"), c(names(code), "*"), paste) %>%
+  as.character() %>%
+  enframe(name = NULL, value = "mut") %>%
+  separate(mut, c("ref", "alt"), sep = " ") %>%
+  filter(ref != alt & ref != "N" & alt != "N") %>%
   mutate(
     call = apply(., 1, function(row) {
-      REF = row["REF"]
-      ALT = row["ALT"]
+      ref = row["ref"]
+      alt = row["alt"]
       case_when(
-        REF == "*" ~ "ins", ALT == "*" ~ "del",
-        REF == "A" & ALT == "G" ~ "trs", REF == "G" & ALT == "A" ~ "trs",
-        REF == "C" & ALT == "T" ~ "trs", REF == "T" & ALT == "C" ~ "trs",
-        REF == "A" & ALT == "C" ~ "trv", REF == "C" & ALT == "A" ~ "trv",
-        REF == "A" & ALT == "T" ~ "trv", REF == "T" & ALT == "A" ~ "trv",
-        REF == "C" & ALT == "G" ~ "trv", REF == "G" & ALT == "C" ~ "trv",
-        REF == "G" & ALT == "T" ~ "trv", REF == "T" & ALT == "G" ~ "trv",
-        is_empty(intersect(code[[REF]], code[[ALT]])) ~ "dis",
+        ref == "*" ~ "ins", alt == "*" ~ "del",
+        ref == "A" & alt == "G" ~ "trs", ref == "G" & alt == "A" ~ "trs",
+        ref == "C" & alt == "T" ~ "trs", ref == "T" & alt == "C" ~ "trs",
+        ref == "A" & alt == "C" ~ "trv", ref == "C" & alt == "A" ~ "trv",
+        ref == "A" & alt == "T" ~ "trv", ref == "T" & alt == "A" ~ "trv",
+        ref == "C" & alt == "G" ~ "trv", ref == "G" & alt == "C" ~ "trv",
+        ref == "G" & alt == "T" ~ "trv", ref == "T" & alt == "G" ~ "trv",
+        is_empty(intersect(code[[ref]], code[[alt]])) ~ "dis",
         T ~ "sim"
       )
     })
   )
+
+call_snp <- function(msa)
+{
+  ref <- msa[1, ]
+  pos <- seq_along(ref)
+  bind_rows(lapply(2:nrow(msa), function(idx) {
+    alt <- msa[idx, ]
+    pos <- pos[ref != '-' & alt != '-' & ref != alt]
+    if (!is_empty(pos)) data.frame(idx = idx, pos = pos, ref = ref[pos], alt = alt[pos], stringsAsFactors = F)
+  }))
+}
+
+call_ind <- function(msa)
+{
+  msa <- msa == "-"
+  ref <- msa[1, ]
+  bind_rows(lapply(2:nrow(msa), function(idx) {
+    dff <- ref - msa[idx, ]
+    bind_rows(
+      str_locate_all(paste(abs(dff == +1), collapse = ""), "1+")[[1]] %>%
+        as.data.frame() %>%
+        mutate(idx = idx, call = "ins"),
+      str_locate_all(paste(abs(dff == -1), collapse = ""), "1+")[[1]] %>%
+        as.data.frame() %>%
+        mutate(idx = idx, call = "del")
+    )
+  }))
+}
+
+is.int0 <- function(val) identical(val, integer(0))
 
 tip.dates <- function(labs)
 {
@@ -54,4 +84,40 @@ as_treedata <- function(res)
 {
   d <- as.treedata(res1)
   treedata(phylo = d[[1]], data = as_tibble(d[[2]]))
+}
+
+parse_dot_attr <- function(val)
+{
+  tokens <-
+    str_split(val, '(,)(?=(?:[^"]|"[^"]*")*$)') %>%
+    lapply(str_split, '(=)(?=(?:[^"]|"[^"]*")*$)') %>%
+    unlist() %>%
+    str_trim() %>%
+    str_remove('^"') %>%
+    str_remove('"$')
+  setNames(tokens[c(F,T)], tokens[c(T,F)])
+}
+
+read_dot <- function(path)
+{
+  lines <- read_lines(path) %>% str_trim()
+
+  edge <- if(startsWith(lines[1], "digraph")) ">" else "-"
+
+  e <-
+    str_match(lines, str_c("(\\d+) -", edge, " (\\d+)")) %>%
+    as.data.frame() %>%
+    filter(complete.cases(.)) %>%
+    select(-V1) %>%
+    setNames(c("from", "to"))
+
+  v <-
+    str_match(lines, "(\\d+)\\[(.+)\\]") %>%
+    as.data.frame() %>%
+    filter(complete.cases(.)) %>%
+    select(-V1) %>%
+    setNames(c("id", "attr")) %>%
+    bind_cols(map_df(lapply(.$attr, parse_attr), bind_rows))
+
+  list(v, e)
 }

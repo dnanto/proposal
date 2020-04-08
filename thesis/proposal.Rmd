@@ -1,3 +1,9 @@
+```{r, include=FALSE}
+library(tidyverse)
+library(lubridate)
+source("scripts/util.R")
+```
+
 # Proposal {.unnumbered}
 
 ## Introduction {.unnumbered}
@@ -18,15 +24,13 @@ The next rule defines a Python program that extracts the accessions from the rep
 
 The next phase performs phylogenetic analyses on the generated data set. The initial rule runs the `mafft` program to generate a multiple sequence alignment. This program calculates a fast Fourier transform to cluster and progressively align the sequences [@katohMAFFTNovelMethod2002a]. It also automatically sets the optimal program execution mode based on input size and reverse complements any sequence if necessary [@katohMAFFTNovelMethod2002a]. Downstream rules process the resulting FASTA file.
 
-Variant detection occurs in a rule that runs the `snp-sites` program. This program builds a consensus sequence off of the multiple alignment and outputs SNPs and indels accordingly [@pageSNPsitesRapidEfficient2016]. The resulting VCF file stores the call and position for each entry in the alignment.
-
 Tree inference occurs in a rule that runs the `iqtree` program to infer a maximum-likelihood tree [@nguyenIQTREEFastEffective2015a]. The program uses `ModelFinder` to calculate the best substitution model based on the Bayesian information criterion [@kalyaanamoorthyModelFinderFastModel2017a]. The "-alrt" and "-bb" flags set the number of bootstrap replicates for the approximate likelihood ratio test of branches and branch support and the "-bnni" flag activates nearest neighbor interchange search optimization strategy [@anisimovaSurveyBranchSupport2011a; @hoangUFBoot2ImprovingUltrafast2018a]. The program outputs a log file and exports the tree in Newick format.
 
 Recombination analysis occurs in a rule that runs the `ClonalFrameML` program. It improves upon the original `ClonalFrame` program by using maximum-likelihood estimation to identify recombinant regions based on the multiple sequence alignment and original tree [@didelotClonalFrameMLEfficientInference2015a; @didelotInferenceBacterialMicroevolution2007]. This step is necessary since recombination obscures temporal analysis [@didelotClonalFrameMLEfficientInference2015a; @rambautExploringTemporalStructure2016a]. Accordingly, the output is a tree based on the clonal frame, the sequence with recombinant regions removed. [@milkmanMolecularEvolutionEscherichia1990]. 
 
 Estimation of evolutionary rate and ancestral dates occurs in a rule that uses the `BactDating` R package. The `bactdate` function performs a Markov chain Monte Carlo simulation to estimate parameters for the strict and relaxed clock models [@didelotBayesianInferenceAncestral2018a]. This method considers the `ClonalFrameML` tree to correct for branch lengths potentially affected by recombination [@didelotBayesianInferenceAncestral2018a]. The rule outputs a serialized R data object for downstream analysis.
 
-The pipeline also includes a rule to output BEAST input files. The rule executes a custom Python script that transforms the multiple sequence alignment and `ModelTest` result into an XML file. The file specifies the sequence and sampling date for each taxon. It also maps the inferred substitution model to a BEAST compatible format. Also, the script includes specifications to run the maximum likelihood estimation using the path sampling stepping stone method. The rule exports the XML file for the user to run it on a computational cluster since due to the computational expense. The following section compares the pipeline results using the BEAST XML files to compare the results obtained with the `BactDating` package.
+The pipeline also includes a rule to output BEAST model files. The rule executes a custom Python script that transforms the multiple sequence alignment and `ModelTest` result into an XML file that also specifies the sequence and sampling date for each taxon. The scripts maps the inferred substitution model to a BEAST compatible format. Also, the script includes specifications to run maximum likelihood estimation using the path sampling stepping stone method. The rule exports the XML file for the user to run it on a computational cluster since due to the heavy computational expense. The following section compares the pipeline results using the BEAST XML files to compare the results obtained with the `BactDating` package.
 
 ### Validation {.unnumbered}
 
@@ -34,6 +38,29 @@ The pipeline also includes a rule to output BEAST input files. The rule executes
 
 ## Results {.unnumbered}
 
-...
+### Pipeline Output
+
+```{r, fig.width=10, fig.height=8}
+msa <- toupper(ape::read.dna("../out/ACU57015//phylo/msa.fna", format = "fasta", as.character = T))
+msa <- msa[order(tip.dates(rownames(msa))), ]
+vcf <- 
+  bind_rows(merge(call_snp(msa), muts), mutate(call_ind(msa), pos = start)) %>%
+  mutate(
+    accver = factor(rownames(msa)[idx], levels = rownames(msa)), 
+    call = factor(call, levels = c("trs", "trv", "sim", "dis", "ins", "del"))
+  )
+
+len <- ncol(msa)
+colors <- list(trs = "blue", trv = "red", sim = "purple", dis = "orange", ins = "black", del = "black")
+shapes <- list(trs = 124, trv = 124, sim = 124, dis = 124, ins = 6, del = 2)
+
+ggplot(vcf, aes(pos, accver)) +
+  geom_point(aes(color = call, shape = call)) +
+  scale_color_manual(values = colors) +
+  scale_shape_manual(values = shapes) +
+  xlim(1, len) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
 
 ## References {.unnumbered}
