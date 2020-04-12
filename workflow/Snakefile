@@ -25,11 +25,11 @@ rule pkg:
   shell:
     "./workflow/scripts/pkg.R > {output[0]:q}"
 
-rule query:
+rule reference:
   input:
-    config["qry"]
+    config["ref"]
   output:
-    root / ("ref.fna" if config["mode"] else "cds.fna")
+    root / f"ref-{mode}.fna"
   run:
     copy2(input[0], output[0])
 

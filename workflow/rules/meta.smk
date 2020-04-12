@@ -1,58 +1,31 @@
-input_aln = root / ("cov.tsv" if config["mode"] else "glc.tsv")
-input_seq = root / ("gen.fna" if config["mode"] else "lib.fna")
-
-rule feature:
+rule esummary:
   input:
-    input_aln
+    root / f"ext-{mode}.fna"
   output:
-    root / "src.json"
+    root / "meta.json"
   params:
     **config
   run:
     Entrez.email = params.email
-    path = Path(input[0])
-    field = "[Q]" if path.name == "cov.tsv" else "subject id"
-    parser = parse_coords if path.name == "cov.tsv" else parse_outfmt7
-    with path.open() as file1, open(output[0], "w") as file2:
-      for batch in batchify(set(map(itemgetter(field), parser(file1))), size=params.post_size):
+    accs = (rec.id for rec in SeqIO.parse(input[0], "fasta"))
+    with open(output[0], "w") as file:
+      for batch in batchify(accs, size=params.post_size):
         with Entrez.esummary(db=params.edb, id=",".join(batch), retmode="json") as handle:
-          file2.write(handle.read())
+          file.write(handle.read())
 
-rule filter:
+rule ext_date:
   input:
-    input_aln,
-    input_seq,
-    root / "src.json"
+    root / "meta.json"
   output:
-    root / "ext.fna"
+    root / "date.tsv",
+    root / "date.sed"
   params:
-    config["qcov_idn_perc"],
     config["formats"]
   run:
-    # file type
-    path = Path(input[0])
-    mode = path.name == "cov.tsv"
-    field1 = "[Q]" if mode else "subject id"
-    field2 = "[COV Q]" if mode else "% identity"
-    parser = parse_coords if mode else parse_outfmt7
-    # index library
-    idx = SeqIO.index_db(":memory:", input[1], "fasta")
-    # load metadata
-    with open(input[2]) as file:
-      meta = dict(chain.from_iterable(map(process_esummary, jsons(file))))
-      date = { k: normalize_date(v.get("collection_date"), params[1]) for k, v in meta.items() }
-    # filter records
-    rec = {}
-    with open(input[0]) as file:
-      for row in parser(file):
-        key = row[field1]
-        if key not in rec and float(row[field2]) >= params[0] and date[key]:
-          val = idx[key]
-          if not mode:
-            start, end = int(row["s. start"]), int(row["s. end"])
-            val = val[start-1:end]
-          val.description = val.description[len(val.id)+1:]
-          val.id = f"{key}_{date[key]}_{meta[key]['taxid']}"
-          rec[key] = val
-    # output extract
-    SeqIO.write(rec.values(), output[0], "fasta")
+    with open(input[0]) as file1, open(output[0], "w") as file2, open(output[1], "w") as file3:
+      meta = dict(chain.from_iterable(map(process_esummary, jsons(file1))))
+      for key, val in meta.items():
+        val = normalize_date(val.get("collection_date"), params[0])
+        if val:
+          print(key, val, sep="\t", file=file2)
+          print(f"/^>/ s/>{key}/>{key}_{val}/", file=file3)

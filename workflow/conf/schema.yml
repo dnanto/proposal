@@ -3,10 +3,10 @@ $schema: "http://json-schema.org/draft-06/schema#"
 description: parameters
 
 properties:
-  qry:
+  ref:
     type: string
-    description: the query FASTA file
-  db:
+    description: the reference sequence query FASTA file
+  bdb:
     type: string
     description: the BLAST database name
   mode:
@@ -37,6 +37,9 @@ properties:
       - perc_identity=90
       - qcov_hsp_perc=90
       - max_target_seqs=20000
+  taxidlist:
+    type: string
+    description: the file to restrict search of database to include only the specified taxonomy IDs on each line
   qcov_idn_perc:
     type: number
     description: the percent query coverage identity [0, 100]
@@ -61,11 +64,35 @@ properties:
       - "%Y-%m-%d"
       - "%b-%Y"
       - "%Y"
-  iter:
+  reco_iter:
     type: integer
-    description: the number of MCMC iterations to perform
+    description: the maximum number of iterations for gubbins
+    default: 1000
+  mcmc_iter:
+    type: integer
+    description: the number of MCMC iterations to perform for bactdating
     default: 1000000
-  thin:
+  mcmc_thin:
     type: integer
-    description: the thining interval between recorded MCMC samples
+    description: the thining interval between recorded MCMC samples for bactdating
     default: 10
+  mcmc_len:
+    type: integer
+    description: the chain length for MCMC for BEAST
+    default: 10000000
+  mcmc_echo:
+    type: integer
+    description: the sampling frequency for MCMC for BEAST
+    default: 10000
+  psss_len:
+    type: integer
+    description: the chain length for PS/SS for BEAST
+    default: 1000000
+  psss_echo:
+    type: integer
+    description: the sampling frequency for PS/SS for BEAST
+    default: 1000
+  path_steps:
+    type: integer
+    description: the number of path steps for PS/SS for BEAST
+    default: 100
