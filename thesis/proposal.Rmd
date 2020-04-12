@@ -3,6 +3,8 @@ library(tidyverse)
 library(lubricity)
 library(lubridate)
 library(ggtree)
+library(tidytree)
+library(BactDating)
 source("scripts/util.R")
 ```
 
@@ -28,11 +30,11 @@ The next phase performs phylogenetic analyses on the generated data set. The ini
 
 Tree inference occurs in a rule that runs the `iqtree` program to infer a maximum-likelihood tree [@nguyenIQTREEFastEffective2015a]. The program uses `ModelFinder` to calculate the best substitution model based on the Bayesian information criterion [@kalyaanamoorthyModelFinderFastModel2017a]. The "-alrt" and "-bb" flags set the number of bootstrap replicates for the approximate likelihood ratio test of branches and branch support and the "-bnni" flag activates nearest neighbor interchange search optimization strategy [@anisimovaSurveyBranchSupport2011a; @hoangUFBoot2ImprovingUltrafast2018a]. The program outputs a log file and exports the tree in Newick format.
 
-Recombination analysis occurs in a rule that runs the `ClonalFrameML` program. It improves upon the original `ClonalFrame` program by using maximum-likelihood estimation to identify recombinant regions based on the multiple sequence alignment and original tree [@didelotClonalFrameMLEfficientInference2015a; @didelotInferenceBacterialMicroevolution2007]. This step is necessary since recombination obscures temporal analysis [@didelotClonalFrameMLEfficientInference2015a; @rambautExploringTemporalStructure2016a]. Accordingly, the output is a tree based on the clonal frame, the sequence with recombinant regions removed. [@milkmanMolecularEvolutionEscherichia1990]. 
+Recombination analysis occurs in a rule that runs the `ClonalFrameML` program. It improves upon the original `ClonalFrame` program by using maximum-likelihood estimation to identify recombinant regions based on the multiple sequence alignment and original tree [@didelotClonalFrameMLEfficientInference2015a; @didelotInferenceBacterialMicroevolution2007]. This step is necessary since recombination obscures temporal analysis [@didelotClonalFrameMLEfficientInference2015a; @rambautExploringTemporalStructure2016a]. Accordingly, the output is a tree based on the clonal frame, the sequence with recombinant regions removed [@milkmanMolecularEvolutionEscherichia1990]. 
 
 Estimation of evolutionary rate and ancestral dates occurs in a rule that uses the `BactDating` R package. The `bactdate` function performs a Markov chain Monte Carlo simulation to estimate parameters for the strict and relaxed clock models [@didelotBayesianInferenceAncestral2018a]. This method considers the `ClonalFrameML` tree to correct for branch lengths potentially affected by recombination [@didelotBayesianInferenceAncestral2018a]. The rule outputs a serialized R data object for downstream analysis.
 
-The pipeline also includes a rule to output BEAST model files. The rule executes a custom Python script that transforms the multiple sequence alignment and `ModelTest` result into an XML file that also specifies the sequence and sampling date for each taxon. The scripts maps the inferred substitution model to a BEAST compatible format. Also, the script includes specifications to run maximum likelihood estimation using the path sampling stepping stone method. The rule exports the XML file for the user to run it on a computational cluster since due to the heavy computational expense. The following section compares the pipeline results using the BEAST XML files to compare the results obtained with the `BactDating` package.
+The pipeline also includes a rule to output BEAST model files. The rule executes a custom Python script that transforms the multiple sequence alignment and `ModelTest` result into an XML file that also specifies the sequence and sampling date for each taxon. The scripts maps the inferred substitution model to a BEAST compatible format. Also, the script includes specifications to run maximum likelihood estimation using the path sampling stepping stone method. The rule exports the XML file for the user to run it on a computational cluster since due to the heavy computational expense. The following section compares the pipeline results using the BEAST XML files to compare the results obtained with the `BactDating` package. 
 
 ### Validation {.unnumbered}
 
@@ -42,10 +44,10 @@ The pipeline also includes a rule to output BEAST model files. The rule executes
 
 ### Pipeline Output {.unnumbered}
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.height=10, fig.width=10}
 meta <- 
   jqr::jq(
-    read_file("../out/ACU57015/src.json"), 
+    read_file("data/ACU57015/src.json"), 
     ".result | del(.uids) | map([.accessionversion, .taxid, .organism, .subtype, .subname]) |.[]"
   ) %>% 
   textConnection() %>% 
@@ -74,7 +76,7 @@ regx_list <- list(
   list(pattern = "(.+):\\s*(.+)\\s*,\\s*(.+)", names = c("cn", "ac2", "ac1"))
 )
 
-msa <- toupper(ape::read.dna("../out/ACU57015/phylo/msa.fna", format = "fasta", as.character = T))
+msa <- toupper(ape::read.dna("data/ACU57015/phylo/msa.fna", format = "fasta", as.character = T))
 
 taxa <-
   map_df(lapply(rownames(msa), function(ele)
@@ -91,7 +93,7 @@ taxa <-
 
 rownames(msa) <- recode(rownames(msa), !!!setNames(taxa$relabel, taxa$label))
 
-tree <- ape::read.tree("../out/ACU57015/phylo/cfml.labelled_tree.newick")
+tree <- ape::read.tree("data/ACU57015/phylo/cfml.labelled_tree.newick")
 tree$tip.label <- recode(tree$tip.label, !!!setNames(taxa$relabel, taxa$label))
 tree <- ape::ladderize(tree)
 lvls <- tree$tip.label[tree$edge[tree$edge[,2] <= length(tree$tip.label), 2]]
@@ -102,15 +104,33 @@ vcf <-
     accver = factor(rownames(msa)[idx], levels = lvls), 
     call = factor(call, levels = c("trs", "trv", "sim", "dis", "ins", "del"))
   )
-```
 
-```{r, echo=FALSE, fig.height=10, fig.width=10}
 len <- ncol(msa)
 colors <- list(trs = "blue", trv = "red", sim = "purple", dis = "orange", ins = "black", del = "black")
 shapes <- list(trs = 124, trv = 124, sim = 124, dis = 124, ins = 6, del = 2)
 
-ggplot(vcf, aes(pos, accver)) +
-  geom_point(aes(color = call, shape = call)) +
+recom <-
+  ape::read.gff("data/ACU57015/phylo/gub.recombination_predictions.gff") %>%
+  apply(1, function(row) {
+    read_delim(str_split(row["attributes"], ";")[[1]], "=", col_names = c("key", "val"), col_types = "cc") %>%
+      filter(key == "taxa") %>% pull(val) %>% str_trim() %>% str_split("\\s+") %>% unlist() %>%
+      enframe(name = NULL, value = "accver") %>%
+      mutate(start = row["start"], end = row["end"])
+  }) %>%
+  bind_rows() %>%
+  mutate(accver = factor(recode(accver, !!!setNames(taxa$relabel, taxa$label)), levels = lvls)) %>%
+  mutate_at(c("start", "end"), as.integer)
+
+ggplot() +
+  geom_point(data = vcf, aes(pos, accver, color = call, shape = call)) +
+  geom_rect(
+    data = recom,
+    aes(
+      xmin = start - 0.5, xmax = end + 0.5, 
+      ymin = as.numeric(accver) - 0.5, ymax = as.numeric(accver) + 0.5
+    ), 
+    fill = "lightgrey", color = "black", alpha = 0.25
+  ) +
   scale_color_manual(values = colors) +
   scale_shape_manual(values = shapes) +
   xlim(1, len) +

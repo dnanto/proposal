@@ -6,7 +6,7 @@ from pathlib import Path
 from shutil import copy2
 from subprocess import DEVNULL, PIPE, Popen, run
 
-from Bio import Entrez, SeqIO
+from Bio import AlignIO, Entrez, SeqIO
 from snakemake.utils import validate
 
 ## config ##
@@ -17,12 +17,14 @@ validate(config, "../conf/schema.yml")
 
 ## variables ##
 
-root = Path(config["out"]) / Path(config["qry"]).stem
+mode = int(config["mode"])
+root = Path(config["out"]) / Path(config["ref"]).stem
 
 targets = [
-    root / "phylo" / "snp.vcf",
-    root / "phylo" / "clock.str.rds",
-    root / "phylo" / "clock.rlx.rds"
+    root / "clock.str.rds",
+    root / "clock.rlx.rds",
+    root / "str-con.xml",
+    root / "rln-con.xml"
 ]
 
 pkg_tmp = Path("pkg.tmp")
@@ -32,7 +34,7 @@ config.get("pkg") and pkg_tmp.touch()
 ## functions ##
 
 def argify(conf, pfx="-"):
-    arr = (ele.split("=", maxsplit = 1) for ele in conf)
+    arr = (ele.split("=", maxsplit=1) for ele in conf)
     arr = ((pfx + ele[0], ele[1]) for ele in arr)
     return chain.from_iterable(arr)
 
@@ -69,7 +71,7 @@ def contextify(row):
     sstart = 1 if sstart < 1 else sstart
     return f'{row["subject acc.ver"]} {sstart}-{send} {sstrand}'
 
-def normalize_date(val, formats, to_fmt = "%Y-%m-%d", na_val = None):
+def normalize_date(val, formats, to_fmt="%Y-%m-%d", na_val=None):
     result = na_val
     for fmt in formats:
         try:
@@ -109,3 +111,15 @@ def decode_btop(btop):
             pos += 1
             yield (*chars, pos)
             chars = []
+
+def contigify(ranges, i=0, j=-1):
+    prv = ranges[0]
+    for idx in range(1, len(ranges)):
+        cur = ranges[idx]
+        if prv[j] < cur[i]:
+            yield prv
+            prv = cur
+        elif prv[j] < cur[j]:
+            prv[j] = cur[j]
+
+    yield prv

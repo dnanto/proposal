@@ -1,7 +1,10 @@
 dependencies:
+  - conda-forge::lxml
+  - anaconda::beautifulsoup4
   - bioconda::mafft=7.455
   - bioconda::mummer4=4.0.0beta2
-  # - bioconda::phyml=3.3.20190909
+  - bioconda::gubbins=2.4.1
+  - bioconda::samtools
+  - bioconda::bedtools
   - bioconda::iqtree=1.6.12
-  - bioconda::snp-sites=2.5.1
-  - bioconda::clonalframeml=1.12
+  - biobuilds::fasta=36.3.8e
