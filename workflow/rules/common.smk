@@ -94,3 +94,18 @@ def process_esummary(obj):
         val = obj[key]
         meta = dict(zip(val["subtype"].split("|"), val["subname"].split("|")))
         yield val["accessionversion"], { **val, **meta }
+
+def decode_btop(btop):
+    pos, digis, chars = 0, [], []
+    for ele in btop:
+        if ele.isdigit():
+            digis.append(ele)
+        else:
+            chars.append(ele)
+        if chars and len(chars) % 2 == 0:
+            if digis:
+                pos += int("".join(digis))
+                digis = []
+            pos += 1
+            yield (*chars, pos)
+            chars = []
