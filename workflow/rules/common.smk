@@ -23,8 +23,12 @@ root = Path(config["out"]) / Path(config["ref"]).stem
 targets = [
     root / "clock.str.rds",
     root / "clock.rlx.rds",
+    root / "rex-con.xml",
+    root / "rex-exp.xml",
+    root / "rln-con.xml",
+    root / "rln-exp.xml",
     root / "str-con.xml",
-    root / "rln-con.xml"
+    root / "str-exp.xml"
 ]
 
 pkg_tmp = Path("pkg.tmp")
