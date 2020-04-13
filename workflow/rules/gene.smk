@@ -55,10 +55,14 @@ rule ext_out7:
   output:
     root / "ext-0.fna"
   params:
-    config["qcov_idn_perc"]
+    config["qcov_idn_perc"],
+    config["gapf"],
   conda:
     "../envs/bio.yml"
   shell:
-    "awk -v cov={params[0]:q} '/^[^#]/ && $3 >= cov {{ print $2, $9, $10; }}' OFS='\t' {input[0]:q} | "
+    "awk -f workflow/scripts/out7plus.awk {input[0]:q} | "
+    "awk -v cov={params[0]:q} '$14 >= cov' | "
+    "awk -v gap={params[1]:q} '$15 <= gap && $16 <= gap' OFS='\t' | "
+    "cut -f 2,9,10 | "
     "bedtools getfasta -fi {input[1]:q} -bed - -fo - | "
     "sed '/^>/ s/:[0-9]*-[0-9]*$//' > {output[0]:q}"
