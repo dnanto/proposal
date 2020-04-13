@@ -117,8 +117,12 @@ rule beautify:
     root / "phy-2.log",
     root / "msa-2.fna"
   output:
+    root / "rex-con.xml",
+    root / "rex-exp.xml",
+    root / "rln-con.xml",
+    root / "rln-exp.xml",
     root / "str-con.xml",
-    root / "rln-con.xml"
+    root / "str-exp.xml"
   params:
     **config
   conda:
