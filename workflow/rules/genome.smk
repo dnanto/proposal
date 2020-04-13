@@ -57,5 +57,5 @@ rule ext_coor:
     "../envs/bio.yml"
   shell:
     "awk -v cov={params[0]:q} 'NR >= 5 && $11 >= cov {{ print $15, $3, $4 }}' OFS='\t' {input[0]:q} | "
-    "bedtools getfasta -fi {input[1]:q} -bed - | "
+    "bedtools getfasta -fi {input[1]:q} -bed - -fo - | "
     "sed '/^>/ s/:[0-9]*-[0-9]*$//' > {output[0]:q}"

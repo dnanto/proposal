@@ -60,5 +60,5 @@ rule ext_out7:
     "../envs/bio.yml"
   shell:
     "awk -v cov={params[0]:q} '/^[^#]/ && $3 >= cov {{ print $2, $9, $10; }}' OFS='\t' {input[0]:q} | "
-    "bedtools getfasta -fi {input[1]:q} -bed - | "
+    "bedtools getfasta -fi {input[1]:q} -bed - -fo - | "
     "sed '/^>/ s/:[0-9]*-[0-9]*$//' > {output[0]:q}"
