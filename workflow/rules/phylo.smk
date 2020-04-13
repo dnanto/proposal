@@ -70,7 +70,7 @@ rule msa2:
   params:
     config["cpu"]
   shell:
-    "bedtools getfasta -fi {input[0]:q} -bed {input[1]:q} -fo - -name | "
+    "bedtools getfasta -fi {input[0]:q} -bed {input[1]:q} -fo - -split -name | "
     "mafft --auto --adjustdirection --thread {params[0]:q} - > {output[0]:q} 2> {output[1]:q}"
 
 rule phy2:
