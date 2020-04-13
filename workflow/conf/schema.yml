@@ -25,6 +25,10 @@ properties:
     type: integer
     description: the number of CPUs to use
     default: 8
+  gapf:
+    type: integer
+    description: the number of allowable gaps flanking global/local alignment results
+    default: 25
   plen:
     type: number
     description: the percentage range of the reference genome length to use for subsetting in [0, 100]
