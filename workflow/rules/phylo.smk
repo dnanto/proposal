@@ -12,9 +12,9 @@ rule msa1:
     "../envs/bio.yml"
   shell:
     "rm -f {input[0]:q}.fai && "
-    "cut -f 1 {input[1]:q} |"
-    "samtools faidx -r - {input[0]:q} |"
-    "sed -f {input[2]:q} |"
+    "cut -f 1 {input[1]:q} | "
+    "samtools faidx -r - {input[0]:q} | "
+    "sed -f {input[2]:q} | "
     "mafft --auto --adjustdirection --thread {params[0]:q} - > {output[0]:q} 2> {output[1]:q}"
 
 rule recogub:
@@ -70,7 +70,7 @@ rule msa2:
   params:
     config["cpu"]
   shell:
-    "bedtools getfasta -fi {input[0]:q} -bed {input[1]:q} -name |"
+    "bedtools getfasta -fi {input[0]:q} -bed {input[1]:q} -fo - -name | "
     "mafft --auto --adjustdirection --thread {params[0]:q} - > {output[0]:q} 2> {output[1]:q}"
 
 rule phy2:
