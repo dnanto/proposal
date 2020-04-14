@@ -119,12 +119,7 @@ rule beautify:
     root / "phy-2.log",
     root / "msa-2.fna"
   output:
-    root / "rex-con.xml",
-    root / "rex-exp.xml",
-    root / "rln-con.xml",
-    root / "rln-exp.xml",
-    root / "str-con.xml",
-    root / "str-exp.xml"
+    expand(str(root.joinpath("{clock}-{coal}.xml")), clock=("rex", "rln", "str"), coal=("con", "exp"))
   params:
     **config
   conda:
@@ -147,3 +142,20 @@ rule beautify:
           {input[1]:q} ./workflow/templates "${{line[1]}}" "${{model[0]}}" "${{model[1]}}" > $ele;
       done;
     """
+
+rule beast:
+  input:
+    root / "{clock}-{coal}.xml"
+  output:
+    root / "{clock}-{coal}.trees",
+    root / "{clock}-{coal}.mcc.tree"
+  threads:
+    8
+  params:
+    conf_ta
+  conda:
+    "../envs/beast.yml"
+  shell:
+    'cd "$(dirname {input[0]:q})" && beast -threads {threads} "$(basename {input[0]:q})" && cd - && '
+    'treeannotator {params} {output[0]:q} {output[1]:q}'
+  

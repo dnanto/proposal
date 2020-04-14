@@ -7,6 +7,7 @@ from shutil import copy2
 from subprocess import DEVNULL, PIPE, Popen, run
 
 from Bio import AlignIO, Entrez, SeqIO
+from snakemake.io import expand
 from snakemake.utils import validate
 
 ## config ##
@@ -20,25 +21,18 @@ validate(config, "../conf/schema.yml")
 mode = int(config["mode"])
 root = Path(config["out"]) / Path(config["ref"]).stem
 
-targets = [
-    root / "clock.str.rds",
-    root / "clock.rlx.rds",
-    root / "rex-con.xml",
-    root / "rex-exp.xml",
-    root / "rln-con.xml",
-    root / "rln-exp.xml",
-    root / "str-con.xml",
-    root / "str-exp.xml"
-]
-
 pkg_tmp = Path("pkg.tmp")
 pkg_tar = Path("pkg.txt")
 config.get("pkg") and pkg_tmp.touch()
 
+conf_ta = dict((ele.split(" ", maxsplit=1) for ele in config["treeannotator"]))
+conf_ta["burnin"] = int(config["mcmc_len"] * float(conf_ta["burnin"]))
+conf_ta = " ".join(f"-{key} {val}" for key, val in conf_ta.items())
+
 ## functions ##
 
-def argify(conf, pfx="-"):
-    arr = (ele.split("=", maxsplit=1) for ele in conf)
+def argify(conf, sep="=", pfx="-"):
+    arr = (ele.split(sep, maxsplit=1) for ele in conf)
     arr = ((pfx + ele[0], ele[1]) for ele in arr)
     return chain.from_iterable(arr)
 
