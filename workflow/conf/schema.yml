@@ -96,3 +96,10 @@ properties:
     type: integer
     description: the number of path steps for PS/SS for BEAST
     default: 100
+  treeannotator:
+    type: array
+    description: the treeannotator parameters (note - burnin is a percentage in [0, 1])
+    default:
+      - heights mean
+      - burnin 0.10
+      - limit 0.5

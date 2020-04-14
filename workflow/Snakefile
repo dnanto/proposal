@@ -4,7 +4,9 @@ include: "rules/common.smk"
 
 rule all:
   input:
-    targets
+    root / "clock.str.rds",
+    root / "clock.rlx.rds",
+    expand(str(root.joinpath("{clock}-{coal}.mcc.tree")), clock=("rex", "rln", "str"), coal=("con", "exp"))
 
 rule all_pkg:
   input:
@@ -12,6 +14,10 @@ rule all_pkg:
     pkg_tmp
   run:
     pkg_tmp.unlink()
+
+rule all_beast:
+  input:
+    expand(str(root.joinpath("{clock}-{coal}.mcc.tree")), clock=("rex", "rln", "str"), coal=("con", "exp"))
 
 ## rule init ##
 
