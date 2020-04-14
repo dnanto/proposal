@@ -4,7 +4,7 @@ rule local:
   output:
     root / "lcl.tsv"
   threads:
-    8
+    32
   params:
     **config
   run:
@@ -44,7 +44,7 @@ rule glocal:
   output:
     root / "glc.tsv"
   threads:
-    8
+    32
   conda:
     "../envs/bio.yml"
   shell:
