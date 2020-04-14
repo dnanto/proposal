@@ -27,13 +27,14 @@ rule nucmer:
     root / "lib-1.fna"
   output:
     root / "coor.delta"
+  threads:
+    8
   params:
-    config["cpu"],
     root / "coor"
   conda:
     "../envs/bio.yml"
   shell:
-    "nucmer -t {params[0]:q} -p {params[1]:q} {input[0]:q} {input[1]:q}"
+    "nucmer -t {threads} -p {params[0]:q} {input[0]:q} {input[1]:q}"
 
 rule coords:
   input:

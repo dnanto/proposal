@@ -6,8 +6,8 @@ rule msa1:
   output:
     root / "msa-1.fna",
     root / "msa-1.log"
-  params:
-    config["cpu"]
+  threads:
+    8
   conda:
     "../envs/bio.yml"
   shell:
@@ -15,7 +15,7 @@ rule msa1:
     "cut -f 1 {input[1]:q} | "
     "samtools faidx -r - {input[0]:q} | "
     "sed -f {input[2]:q} | "
-    "mafft --auto --adjustdirection --thread {params[0]:q} - > {output[0]:q} 2> {output[1]:q}"
+    "mafft --auto --adjustdirection --thread {threads} - > {output[0]:q} 2> {output[1]:q}"
 
 rule recogub:
   input:
@@ -23,14 +23,15 @@ rule recogub:
   output:
     root / "gub.log",
     root / "gub.recombination_predictions.gff"
+  threads:
+    8
   params:
     root / "gub",
-    config["reco_iter"],
-    config["cpu"]
+    config["reco_iter"]
   conda:
     "../envs/bio.yml"
   shell:
-    "run_gubbins.py --prefix {params[0]:q} --iterations {params[1]:q} --threads {params[2]:q} {input[0]:q} > {output[0]:q}"
+    "run_gubbins.py --prefix {params[0]:q} --iterations {params[1]:q} --threads {threads} {input[0]:q} > {output[0]:q}"
 
 rule recobed:
   input:
@@ -67,11 +68,11 @@ rule msa2:
   output:
     root / "msa-2.fna",
     root / "msa-2.log"
-  params:
-    config["cpu"]
+  threads:
+    8
   shell:
     "bedtools getfasta -fi {input[0]:q} -bed {input[1]:q} -fo - -split -name | "
-    "mafft --auto --adjustdirection --thread {params[0]:q} - > {output[0]:q} 2> {output[1]:q}"
+    "mafft --auto --adjustdirection --thread {threads} - > {output[0]:q} 2> {output[1]:q}"
 
 rule phy2:
   input:
@@ -79,12 +80,13 @@ rule phy2:
   output:
     root / "phy-2.treefile",
     root / "phy-2.log"
+  threads:
+    8
   params:
-    root / "phy-2",
-    config["cpu"]
+    root / "phy-2"
   shell:
     "rm -f {params[0]:q}.* && "
-    "iqtree -s {input[0]:q} -pre {params[0]:q} -alrt 1000 -bb 1000 -bnni -nt {params[1]:q} > /dev/null;"
+    "iqtree -s {input[0]:q} -pre {params[0]:q} -alrt 1000 -bb 1000 -bnni -nt {threads} > /dev/null;"
 
 rule mcmc_str:
   input:

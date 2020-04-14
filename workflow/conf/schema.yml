@@ -21,10 +21,6 @@ properties:
     type: string
     description: the ouput directory
     default: out
-  cpu:
-    type: integer
-    description: the number of CPUs to use
-    default: 8
   gapf:
     type: integer
     description: the number of allowable gaps flanking global/local alignment results
