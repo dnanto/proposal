@@ -28,7 +28,7 @@ rule nucmer:
   output:
     root / "coor.delta"
   threads:
-    8
+    32
   params:
     root / "coor"
   conda:

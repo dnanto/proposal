@@ -7,7 +7,7 @@ rule msa1:
     root / "msa-1.fna",
     root / "msa-1.log"
   threads:
-    8
+    32
   conda:
     "../envs/bio.yml"
   shell:
@@ -24,7 +24,7 @@ rule recogub:
     root / "gub.log",
     root / "gub.recombination_predictions.gff"
   threads:
-    8
+    32
   params:
     root / "gub",
     config["reco_iter"]
@@ -69,7 +69,7 @@ rule msa2:
     root / "msa-2.fna",
     root / "msa-2.log"
   threads:
-    8
+    32
   shell:
     "bedtools getfasta -fi {input[0]:q} -bed {input[1]:q} -fo - -split -name | "
     "mafft --auto --adjustdirection --thread {threads} - > {output[0]:q} 2> {output[1]:q}"
@@ -81,7 +81,7 @@ rule phy2:
     root / "phy-2.treefile",
     root / "phy-2.log"
   threads:
-    8
+    32
   params:
     root / "phy-2"
   shell:
@@ -150,7 +150,7 @@ rule beast:
     root / "{clock}-{coal}.trees",
     root / "{clock}-{coal}.mcc.tree"
   threads:
-    8
+    32
   params:
     conf_ta
   conda:
