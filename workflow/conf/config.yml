@@ -2,4 +2,3 @@ ref: data/FJ643676.1/ACU57010.fna
 bdb: "10508"
 taxidlist: data/10508.txt
 out: out
-cpu: 8

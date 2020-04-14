@@ -3,12 +3,14 @@ rule local:
     root / "ref-0.fna"
   output:
     root / "lcl.tsv"
+  threads:
+    8
   params:
     **config
   run:
     cmd = (
       "blastn", "-db", params.bdb, "-query", input[0], "-out", output[0], 
-      "-outfmt", "7 std sstrand qlen", "-num_threads", str(params.cpu), *argify(params.blast)
+      "-outfmt", "7 std sstrand qlen", "-num_threads", str(threads), *argify(params.blast)
     )
     taxidlist = params.get("taxidlist")
     cmd = (*cmd, "-taxidlist", taxidlist) if taxidlist else cmd
@@ -41,12 +43,12 @@ rule glocal:
     root / "lib-0.fna"
   output:
     root / "glc.tsv"
-  params:
-    config["cpu"]
+  threads:
+    8
   conda:
     "../envs/bio.yml"
   shell:
-    "glsearch36 -m 8CB -T {params[0]:q} {input[0]:q} {input[1]:q} > {output[0]:q}"
+    "glsearch36 -m 8CB -T {threads} {input[0]:q} {input[1]:q} > {output[0]:q}"
 
 rule ext_out7:
   input:
