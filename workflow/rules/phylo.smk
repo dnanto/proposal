@@ -41,25 +41,24 @@ rule recobed:
     root / "rec.bed"
   run:
       msa = AlignIO.read(input[0], "fasta")
+      mlen = msa.get_alignment_length()
 
       with open(input[1]) as file:
         blocks = (ele for ele in file if not ele.startswith("#"))
         blocks = (list(map(int, ele.split("\t")[3:5])) for ele in blocks)
         blocks = sorted(blocks)
-        blocks = ((ele[0] - 1, ele[1] + 1) for ele in contigify(blocks))
-        blocks = chain.from_iterable(blocks)
-        blocks = [0, *blocks, msa.get_alignment_length()]
-        blocks = [[blocks[i], blocks[i+1]] for i in range(0, len(blocks), 2)]
-        bsizes = ",".join(map(str, (ele[1] - ele[0] for ele in blocks)))
-        bstart = ",".join((str(ele[0]) for ele in blocks))
+        if blocks:
+          blocks = ((ele[0] - 1, ele[1] + 1) for ele in contigify(blocks))
+          blocks = [0, *chain.from_iterable(blocks), mlen]
+          blocks = [[blocks[i], blocks[i+1]] for i in range(0, len(blocks), 2)]
+          bsizes = ",".join(map(str, (ele[1] - ele[0] for ele in blocks)))
+          bstart = ",".join((str(ele[0]) for ele in blocks))
+        else:
+          blocks, bsizes, bstart = [[0, mlen]], mlen, 0
 
       with open(output[0], "w") as file:
         for rec in msa:
-            print(
-                rec.id, 0, msa.get_alignment_length(), rec.id, 0, ".", 0, 0, 0,
-                len(blocks), bsizes, bstart,
-                sep="\t", file=file
-            )
+            print(rec.id, 0, mlen, rec.id, 0, ".", 0, 0, 0, len(blocks), bsizes, bstart, sep="\t", file=file)
 
 rule msa2:
   input:
