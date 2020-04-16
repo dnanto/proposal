@@ -47,8 +47,10 @@ The pipeline also includes a rule to output BEAST model files. The rule executes
 ### Pipeline Output {.unnumbered}
 
 ```{r}
+acc <- "FJ643676.1"
+
 meta <- 
-  file.path(root, "FJ643676.1", "meta.json") %>%
+  file.path(root, acc, "meta.json") %>%
   read_file() %>%
   jqr::jq(".result | del(.uids) | map([.accessionversion, .taxid, .organism, .subtype, .subname]) |.[]") %>% 
   textConnection() %>% 
@@ -78,7 +80,7 @@ regx_list <- list(
 )
 
 msa <- 
-  file.path(root, "FJ643676.1", "msa-1.fna") %>%
+  file.path(root, acc, "msa-1.fna") %>%
   ape::read.dna(format = "fasta", as.character = T) %>%
   toupper()
 
@@ -97,7 +99,7 @@ meta <-
 
 rownames(msa) <- recode(rownames(msa), !!!setNames(meta$relabel, meta$label))
 
-tree <- file.path(root, "FJ643676.1", "gub.final_tree.tre") %>% ape::read.tree()
+tree <- file.path(root, acc, "gub.final_tree.tre") %>% ape::read.tree()
 tree$tip.label <- recode(tree$tip.label, !!!setNames(meta$relabel, meta$label))
 tree <- ape::ladderize(tree)
 lvls <- tree$tip.label[tree$edge[tree$edge[,2] <= length(tree$tip.label), 2]]
@@ -114,7 +116,7 @@ colors <- list(trs = "blue", trv = "red", sim = "purple", dis = "orange", ins = 
 shapes <- list(trs = 124, trv = 124, sim = 124, dis = 124, ins = 6, del = 2)
 
 recom <-
-  file.path(root, "FJ643676.1", "gub.recombination_predictions.gff") %>%
+  file.path(root, acc, "gub.recombination_predictions.gff") %>%
   ape::read.gff() %>%
   apply(1, function(row) {
     read_delim(str_split(row["attributes"], ";")[[1]], "=", col_names = c("key", "val"), col_types = "cc") %>%
@@ -201,24 +203,25 @@ parse_mle_report <- function(path)
 }
 
 df.bf <-
-  file.path(root, "FJ643676.1") %>%
-  list.files(pattern = ".mle.result.log", recursive = T, full.names = T) %>%
+  list.files(root, pattern = ".mle.result.log", recursive = T, full.names = T) %>%
   lapply(parse_mle_report) %>%
   bind_rows() %>%
-  mutate(name = basename(path)) %>%
+  mutate(acc = basename(dirname(path)), name = basename(path)) %>%
   separate(name, c("clock", "coalescent"), sep = "[-.]", extra = "drop") %>%
+  group_by(acc) %>%
 	mutate(
 	  `BF (PS)` = PS - PS[which(clock == "str" & coalescent == "con")],
 		`BF (SS)` = SS - SS[which(clock == "str" & coalescent == "con")]
 	) %>%
-  arrange(desc(`BF (PS)`))
+  ungroup() %>%
+  arrange(acc, desc(`BF (PS)`))
 
-select(df.bf, clock, coalescent, everything(), -path)
+select(df.bf, acc, clock, coalescent, everything(), -path)
 ```
+
 ```{r}
 logs <-
-  file.path(root, "FJ643676.1") %>%
-  list.files(pattern = "\\w+-\\w+.log", recursive = T, full.names = T) %>%
+  list.files(root, pattern = "\\w+-\\w+.log", recursive = T, full.names = T) %>%
   grep("(rex|rln|str)-(con|exp).log", ., value = T)
 ```
 
@@ -234,10 +237,10 @@ df.ess <-
       c(path = path)
   }) %>%
   map_df(bind_rows) %>%
-  select(path, everything()) %>%
-  mutate_at("path", basename) %>%
+  mutate(acc = basename(dirname(path)), path = basename(path)) %>%
+  select(acc, path, everything()) %>%
   separate(path, c("clock", "coalescent"), sep = "[-.]", extra = "drop") %>%
-  mutate_at(3:ncol(.), as.double)
+  mutate_at(4:ncol(.), as.double)
 
 df.ess
 ```
@@ -250,16 +253,30 @@ df.est <-
       c(path = path)
   }) %>%
   map_df(bind_rows) %>%
-  select(path, everything()) %>%
-  mutate_at("path", basename) %>%
+  mutate(acc = basename(dirname(path)), path = basename(path)) %>%
+  select(acc, path, everything()) %>%
   separate(path, c("clock", "coalescent"), sep = "[-.]", extra = "drop") %>%
-  mutate_at(3:ncol(.), as.double)
+  mutate_at(4:ncol(.), as.double)
 
-select(df.est, clock, coalescent, joint, prior, likelihood, age.root., meanRate) 
+select(df.est, acc, clock, coalescent, joint, prior, likelihood, age.root., meanRate) 
+```
+```{r}
+df.result <-
+  filter(df.ess, joint >= 200, prior >= 200, likelihood >= 200) %>%
+    select(acc, clock, coalescent) %>%
+    merge(df.bf) %>%
+    merge(df.est) %>%
+    select(acc, clock, coalescent, `BF (PS)`, age.root., meanRate) %>%
+    arrange(desc(`BF (PS)`)) %>%
+    group_by(acc) %>%
+    top_n(1, `BF (PS)`) %>%
+    ungroup()
+
+df.result
 ```
 
 ```{r, echo=FALSE, fig.height=10, fig.width=10}
-tree.beast <- str_replace(df.bf$path[2], ".mle\\.result\\.log$", ".mcc.tree") %>% read.beast()
+tree.beast <- read.beast("../out/FJ643676.1/rex-exp.mcc.tree")
 tree.beast@phylo$tip.label <- recode(tree.beast@phylo$tip.label, !!!setNames(meta$relabel, meta$label))
 plot_chronogram(tree.beast)
 ```
