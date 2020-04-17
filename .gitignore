@@ -8,7 +8,7 @@ data
 dag.*
 out
 pkg.*
-thesis/_*/
+**/_book*/**
 thesis/*.html
 workflow/envs/bio
 workflow/envs/R

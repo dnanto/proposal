@@ -1,4 +1,23 @@
-```{r, include=FALSE}
+---
+title: "Molecular Clock analysis of <i>Human adenovirus</i>"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+author: "Daniel Antonio Negrón"
+institution: "George Mason University"
+division: "College of Science"
+advisor: "Don Seto, PhD"
+altadvisor: "Patrick Gillevet, PhD & Sterling Thomas, PhD"
+department: "School of Systems Biology"
+degree: "Doctor of Philosophy"
+bibliography: "bib/ref.bib"
+csl: "csl/apa.csl"
+site: bookdown::bookdown_site
+documentclass: book
+output:
+  bookdown::gitbook: default
+---
+
+```{r setup, include=FALSE}
+# packages
 library(tidyverse)
 library(lubricity)
 library(lubridate)
@@ -8,8 +27,16 @@ library(BactDating)
 library(parallel)
 library(tracerer)
 library(treeio)
-source("scripts/util.R")
-root <- file.path("..", "out")
+# scripts
+source("../scripts/util.R")
+# options
+knitr::opts_chunk$set(
+  echo = F,
+  fig.height = 10, 
+  fig.width = 10
+)
+# variables
+root <- "../../out"
 ```
 
 # Proposal {.unnumbered}
@@ -52,10 +79,10 @@ acc <- "FJ643676.1"
 meta <- 
   file.path(root, acc, "meta.json") %>%
   read_file() %>%
-  jqr::jq(".result | del(.uids) | map([.accessionversion, .taxid, .organism, .subtype, .subname]) |.[]") %>% 
+  jqr::jq(".result | del(.uids) | map([.accessionversion, .title, .taxid, .organism, .subtype, .subname]) |.[]") %>% 
   textConnection() %>% 
   jsonlite::stream_in(simplifyDataFrame = T, verbose = F) %>%
-  setNames(c("accver", "taxid", "organism", "subtype", "subname")) %>%
+  setNames(c("accver", "title", "taxid", "organism", "subtype", "subname")) %>%
   bind_cols(
     .,
     bind_rows(
@@ -85,14 +112,14 @@ msa <-
   toupper()
 
 meta <-
-  map_df(lapply(rownames(msa), function(ele)
+  lapply(rownames(msa), function(ele)
     setNames(
       str_match(ele, "(.+)_(\\d{4}-\\d{2}-\\d{2})$")[1, ],
       c("label", "accver", "date")
     )
-  ), bind_rows) %>%
+  ) %>%
+  map_df(bind_rows) %>%
   merge(meta, by = "accver", sort = F) %>%
-  select(label, accver, date, taxid, organism, country) %>%
   bind_cols(bind_rows(lapply(.$country, process_regx_list, regx_list = regx_list))) %>%
   mutate(relabel = str_c(accver, date, cn, taxid, sep = "|")) %>%
   select(label, relabel, everything())
@@ -129,7 +156,7 @@ recom <-
   mutate_at(c("start", "end"), as.integer)
 ```
 
-```{r, echo=FALSE, fig.height=10, fig.width=10}
+```{r}
 ggplot() +
   geom_point(data = vcf, aes(pos, accver, color = call, shape = call)) +
   geom_rect(
@@ -154,54 +181,6 @@ ggplot() +
 ```
 
 ```{r}
-res1 <- file.path(root, "FJ643676.1", "clock.poi.rds") %>% readRDS()
-res2 <- file.path(root, "FJ643676.1", "clock.rlx.rds") %>% readRDS()
-res <- capture.output(modelcompare(res1, res2)) %>% last() %>% str_match("Model (\\d)") %>% last() %>% as.integer()
-res <- if(res == 1) res1 else res2
-```
-
-```{r, fig.width=10}
-plot(res, "trace")
-```
-
-```{r, echo=FALSE, fig.height=10, fig.width=10}
-plot_chronogram <- function(tree)
-{
-  tip.label <- tree@phylo$tip.label
-  tip.date <- str_extract(tip.label, "\\d{4}-\\d{2}-\\d{2}")
-  tip.taxid <- split(tip.label, str_extract(tip.label, "\\d+$"))
-  tree@phylo <- groupOTU(tree@phylo, tip.taxid, "taxid")
-  tree@phylo$tip.label <- str_remove(tip.label, "_\\d+$")
-  ggtree(tree, mrsd = min(tip.date)) +
-    aes(color = taxid) +
-    geom_tiplab(linesize = 1, align = T, color = "black") +
-    geom_range("height_0.95_HPD") +
-    theme_tree2() +
-    theme(
-      legend.position = "bottom",
-      panel.grid.major.x = element_line(color="black", size = .25),
-      panel.grid.minor.x = element_line(color="grey", size = .25)
-    )
-}
-
-tree <- as_treedata(res)
-tree@phylo$tip.label <- recode(tree@phylo$tip.label, !!!setNames(meta$relabel, meta$label))
-plot_chronogram(tree)
-```
-
-```{r}
-parse_mle_report <- function(path)
-{
-  lines <- read_lines(path)
-  PS = "log marginal likelihood (using path sampling) from pathLikelihood.delta = "
-  SS = "log marginal likelihood (using stepping stone sampling) from pathLikelihood.delta = "
-  list(
-    path = path,
-    PS = as.double(str_sub(lines[startsWith(lines, PS)], nchar(PS) + 1)),
-    SS = as.double(str_sub(lines[startsWith(lines, SS)], nchar(SS) + 1))
-  )
-}
-
 df.bf <-
   list.files(root, pattern = ".mle.result.log", recursive = T, full.names = T) %>%
   lapply(parse_mle_report) %>%
@@ -215,8 +194,6 @@ df.bf <-
 	) %>%
   ungroup() %>%
   arrange(acc, desc(`BF (PS)`))
-
-select(df.bf, acc, clock, coalescent, everything(), -path)
 ```
 
 ```{r}
@@ -242,10 +219,6 @@ df.ess <-
   separate(path, c("clock", "coalescent"), sep = "[-.]", extra = "drop") %>%
   mutate_at(4:ncol(.), as.double)
 
-df.ess
-```
-
-```{r}
 df.est <- 
   mclapply(logs, function(path) {
     parse_beast_log(path) %>%
@@ -258,27 +231,30 @@ df.est <-
   separate(path, c("clock", "coalescent"), sep = "[-.]", extra = "drop") %>%
   mutate_at(4:ncol(.), as.double)
 
-select(df.est, acc, clock, coalescent, joint, prior, likelihood, age.root., meanRate) 
-```
-```{r}
-df.result <-
+df.res <-
   filter(df.ess, joint >= 200, prior >= 200, likelihood >= 200) %>%
-    select(acc, clock, coalescent) %>%
-    merge(df.bf) %>%
-    merge(df.est) %>%
-    select(acc, clock, coalescent, `BF (PS)`, age.root., meanRate) %>%
-    arrange(desc(`BF (PS)`)) %>%
-    group_by(acc) %>%
-    top_n(1, `BF (PS)`) %>%
-    ungroup()
-
-df.result
+  select(acc, clock, coalescent) %>%
+  merge(df.bf) %>%
+  merge(df.est) %>%
+  select(acc, clock, coalescent, `BF (PS)`, age.root., meanRate) %>%
+  arrange(desc(`BF (PS)`)) %>%
+  group_by(acc) %>%
+  top_n(1, `BF (PS)`) %>%
+  ungroup()
 ```
 
-```{r, echo=FALSE, fig.height=10, fig.width=10}
-tree.beast <- read.beast("../out/FJ643676.1/rex-exp.mcc.tree")
-tree.beast@phylo$tip.label <- recode(tree.beast@phylo$tip.label, !!!setNames(meta$relabel, meta$label))
-plot_chronogram(tree.beast)
+```{r, warning=FALSE}
+tree <- 
+  df.res[df.res$acc == acc, ] %>%
+  with(paste0(clock, "-", coalescent, ".mcc.tree")) %>%
+  file.path(root, acc, .) %>%
+  read.beast()
+tree@phylo$tip.label <- recode(tree@phylo$tip.label, !!!setNames(meta$relabel, meta$label))
+plot_chronogram(tree)
+```
+
+```{r}
+knitr::kable(df.res)
 ```
 
 ## References {.unnumbered}
