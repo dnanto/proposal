@@ -1,0 +1,4 @@
+book_filename: "proposal"
+rmd_files: ["index.Rmd"]
+download: [["proposal.pdf", "PDF"], ["proposal.epub", "EPUB"], ["proposal.docx", "Word"]]
+delete_merged_file: true

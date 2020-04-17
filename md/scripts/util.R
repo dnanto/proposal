@@ -86,6 +86,37 @@ as_treedata <- function(res)
   treedata(phylo = d[[1]], data = as_tibble(d[[2]]))
 }
 
+plot_chronogram <- function(tree)
+{
+  tip.label <- tree@phylo$tip.label
+  tip.date <- str_extract(tip.label, "\\d{4}-\\d{2}-\\d{2}")
+  tip.taxid <- split(tip.label, str_extract(tip.label, "\\d+$"))
+  tree@phylo <- groupOTU(tree@phylo, tip.taxid, "taxid")
+  tree@phylo$tip.label <- str_remove(tip.label, "_\\d+$")
+  ggtree(tree, mrsd = min(tip.date)) +
+    aes(color = taxid) +
+    geom_tiplab(linesize = 1, align = T, color = "black") +
+    geom_range("height_0.95_HPD") +
+    theme_tree2() +
+    theme(
+      legend.position = "bottom",
+      panel.grid.major.x = element_line(color="black", size = .25),
+      panel.grid.minor.x = element_line(color="grey", size = .25)
+    )
+}
+
+parse_mle_report <- function(path)
+{
+  lines <- read_lines(path)
+  PS = "log marginal likelihood (using path sampling) from pathLikelihood.delta = "
+  SS = "log marginal likelihood (using stepping stone sampling) from pathLikelihood.delta = "
+  list(
+    path = path,
+    PS = as.double(str_sub(lines[startsWith(lines, PS)], nchar(PS) + 1)),
+    SS = as.double(str_sub(lines[startsWith(lines, SS)], nchar(SS) + 1))
+  )
+}
+
 parse_dot_attr <- function(val)
 {
   tokens <-
