@@ -1,0 +1,33 @@
+---
+output: html_document
+---
+
+```{r, setup}
+library(tidyverse)
+```
+
+```{bash, efetch}
+[ ! -f rec.fna ] && awk 'NR > 1 { print $1; }' meta.tsv | tr '\n' ',' | xargs efetch -db nuccore -format fasta -id > rec.fna
+```
+
+```{bash, meta}
+awk -F '\t' 'NR > 1 { printf "/^>/ s/%s/%s_%s_%s/\n", $1, $1, $4, $5; }' meta.tsv > meta.sed
+```
+
+```{bash, mafft}
+[ ! -f msa-1.fna ] && 
+sed '/^>/ s/ .*//' rec.fna | sed -f meta.sed | mafft --auto --adjustdirection --thread 8 - > msa-1.fna 2> msa-1.log
+```
+
+```{bash, gubbins}
+sed '/^[^>]/ s/[^acgtACGT-]/N/g' msa-1.fna > msa-2.fna
+[ ! -f gub.log ] && run_gubbins.py --prefix gub --iterations 1000 --threads 8 msa-2.fna > gub.log
+bedtools maskfasta -fi msa-1.fna -fo msa-2.fna -bed gub.recombination_predictions.gff
+```
+
+```{bash, iqtree}
+[ ! -f phy.log ] && iqtree -s msa-2.fna -pre phy -alrt 1000 -bb 1000 -bnni -nt 8 > /dev/null
+```
+
+
+
