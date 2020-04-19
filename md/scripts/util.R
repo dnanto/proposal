@@ -86,10 +86,10 @@ as_treedata <- function(res)
   treedata(phylo = d[[1]], data = as_tibble(d[[2]]))
 }
 
-plot_chronogram <- function(tree)
+plot_chronogram <- function(tree, dregex = "\\d{4}-\\d{2}-\\d{2}")
 {
   tip.label <- tree@phylo$tip.label
-  tip.date <- str_extract(tip.label, "\\d{4}-\\d{2}-\\d{2}")
+  tip.date <- str_extract(tip.label, dregex)
   tip.taxid <- split(tip.label, str_extract(tip.label, "\\d+$"))
   tree@phylo <- groupOTU(tree@phylo, tip.taxid, "taxid")
   tree@phylo$tip.label <- str_remove(tip.label, "_\\d+$")

@@ -27,16 +27,13 @@ library(BactDating)
 library(parallel)
 library(tracerer)
 library(treeio)
+library(kableExtra)
 # scripts
 source("../scripts/util.R")
 # options
-knitr::opts_chunk$set(
-  echo = F,
-  fig.height = 10, 
-  fig.width = 10
-)
+knitr::opts_chunk$set(echo = F, fig.height = 10, fig.width = 10)
 # variables
-root <- "../../out"
+root <- "exp"
 ```
 
 # Proposal {.unnumbered}
@@ -199,10 +196,9 @@ df.bf <-
 ```{r}
 logs <-
   list.files(root, pattern = "\\w+-\\w+.log", recursive = T, full.names = T) %>%
-  grep("(rex|rln|str)-(con|exp).log", ., value = T)
-```
+  grep("(rex|rln|str)-(con|exp).log", ., value = T) %>%
+  grep("HAdV-4", ., invert = T, value = T)
 
-```{r}
 pburn <- 0.1
 
 df.ess <-
@@ -230,22 +226,23 @@ df.est <-
   select(acc, path, everything()) %>%
   separate(path, c("clock", "coalescent"), sep = "[-.]", extra = "drop") %>%
   mutate_at(4:ncol(.), as.double)
+```
+
+```{r}
+keys <- paste0(c("joint", "prior", "likelihood", "age.root.", "meanRate"), ".ess")
 
 df.res <-
-  filter(df.ess, joint >= 200, prior >= 200, likelihood >= 200) %>%
-  select(acc, clock, coalescent) %>%
-  merge(df.bf) %>%
-  merge(df.est) %>%
-  select(acc, clock, coalescent, `BF (PS)`, age.root., meanRate) %>%
-  arrange(desc(`BF (PS)`)) %>%
-  group_by(acc) %>%
-  top_n(1, `BF (PS)`) %>%
-  ungroup()
+  merge(df.est, df.ess, by = c("acc", "clock", "coalescent"), suffixes = c(".est", ".ess")) %>%
+  merge(df.bf, ., sort = F) 
+
+idx <- (select(df.res, all_of(keys)) >= 200) %>% apply(1, all) %>% which()
 ```
 
 ```{r, warning=FALSE}
-tree <- 
-  df.res[df.res$acc == acc, ] %>%
+tree <-
+  df.res[idx, ] %>% 
+  .[.$acc == acc, ] %>% 
+  head(1) %>%
   with(paste0(clock, "-", coalescent, ".mcc.tree")) %>%
   file.path(root, acc, .) %>%
   read.beast()
@@ -254,7 +251,10 @@ plot_chronogram(tree)
 ```
 
 ```{r}
-knitr::kable(df.res)
+select(df.res, acc, `BF (PS)`, clock, coalescent, starts_with(c("age.root.", "meanRate")), -path, -state) %>%
+  knitr::kable("html", col.names = c("acc", "BF (PS)", "clock", "coal", c("est" ,"ess", "est" ,"ess"))) %>%
+  add_header_above(c(" " = 2, "model" = 2, "age(root)" = 2, "mean(rate)" = 2)) %>%
+  row_spec(idx, bold = T)
 ```
 
 ## References {.unnumbered}
