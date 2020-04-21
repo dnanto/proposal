@@ -9,6 +9,7 @@ dag.*
 out
 pkg.*
 **/_book*/**
+md/proposal/exp
 thesis/*.html
 workflow/envs/bio
 workflow/envs/R
