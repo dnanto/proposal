@@ -31,7 +31,7 @@ library(kableExtra)
 # scripts
 source("../scripts/util.R")
 # options
-knitr::opts_chunk$set(echo = F, fig.height = 10, fig.width = 10)
+knitr::opts_chunk$set(echo = F, fig.height = 10, fig.width = 10, fig.align = "center")
 # variables
 root <- "exp"
 ```
@@ -43,6 +43,8 @@ root <- "exp"
 This research relies on molecular clock methods to estimate substitution rates and divergence times in *Human adenovirus* samples. This requires a highly curated data set of time-stamped, homologous, nucleic acid sequences representative of a measurably evolving population [@drummondMeasurablyEvolvingPopulations2003]. Thus, a preprocessing workflow is necessary to extract and normalize sampling date information. The presence of heterogeneous or ambiguous date formats is a complicating factor and a time sink. Also, manual preprocessing becomes intractable as the number of samples increases. As a result, this research defines a generic workflow and automated, parallel pipeline that coordinates the execution of preprocessing and analytical tasks in a reproducible manner.
 
 ## Methods {.unnumbered}
+
+![mep](etc/mep.svg)
 
 This section documents an executable pipeline that constructs data sets for molecular clock analysis. The solution relies on Snakemake, which is a portable, rule-based workflow engine [@kosterSnakemakeScalableBioinformatics2012]. Each rule defines a step in the workflow. A rule can also configure its execution environment via the Conda package manager. The engine automatically infers the workflow path and parallelization based on input dependencies, creating a directed acyclic graph [@kosterSnakemakeScalableBioinformatics2012]. Accordingly, the engine guarantees the reproducibility of each step.
 
