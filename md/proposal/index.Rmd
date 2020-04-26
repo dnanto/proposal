@@ -8,7 +8,7 @@ advisor: "Don Seto, PhD"
 altadvisor: "Patrick Gillevet, PhD & Sterling Thomas, PhD"
 department: "School of Systems Biology"
 degree: "Doctor of Philosophy"
-bibliography: "bib/ref.bib"
+bibliography: "references.bib"
 csl: "csl/apa.csl"
 site: bookdown::bookdown_site
 documentclass: book
@@ -36,49 +36,71 @@ knitr::opts_chunk$set(echo = F, fig.height = 10, fig.width = 10, fig.align = "ce
 root <- "exp"
 ```
 
-# Proposal {.unnumbered}
+# Abstract
 
-## Abstract
+Members of the *Mastadenovirus* genus include re-emergent, globally-distributed, pathogens with mammalian hosts. Advances in sequencing technology have yielded large, publicly-available data sets that are useful for understanding the genotypes that infect humans. The combination of sequence, isolation date, and location help reconstruct the trajectory of different strains during outbreaks and is crucial for enhancing countermeasure quality. Accordingly, molecular clock techniques cluster samples and estimate divergence times and evolutionary rates. Such data is difficult to assemble and sanitize for large data sets. Thus, the proposed research includes the development of a protocol and automated pipeline that constructs data sets for molecular clock analysis with application to different genotypes. Preliminary analysis compares results to previous studies and tests the hypothesis that external proteins evolve faster than internal ones.
 
-Members of the **Mastadenovirus** genus include re-emergent, globally-distributed, viral pathogens with mammalian hosts. Advances in sequencing technology have yielded large, publicly-available data sets that are useful for understanding genotypes that infect humans in close-living quarters, such as military barracks and college dormitories. The combination of sequence, isolation date, and location help reconstruct the trajectory of different strains during outbreaks and is crucial for improving countermeasure quality. Accordingly, molecular clock techniques cluster samples and estimate divergence times and evolutionary rates. Such data is often difficult to assemble and sanitize for large data sets. Thus, the proposed research includes the development of a protocol and automated pipeline that constructs data sets for molecular clock analysis with application to different genotypes. Proposed analysis will compare results to previous studies and test the hypothesis that external proteins evolve faster than internal ones.
+# Introduction
 
-## Introduction {.unnumbered}
+This research relies on molecular clock methods to estimate substitution rates and divergence times in *Mastadenovirus* samples. This requires a highly curated data set of time-stamped, homologous, nucleic acid sequences representative of a measurably evolving population [@drummondMeasurablyEvolvingPopulations2003]. Thus, a preprocessing workflow is necessary to extract and normalize sampling date information. The presence of heterogeneous or ambiguous date formats is a complicating factor and a time sink. Also, manual processing becomes intractable as the number of samples increases and potentially generates costly downstream errors. As a result, this research defines a generic workflow and automated, parallel pipeline that coordinates the execution of preprocessing and analytical tasks in a reproducible manner. This is a preliminary molecular clock study that replicates an HAdV-4 paper and presents the automated characterization of HAdV-55.
 
-This research relies on molecular clock methods to estimate substitution rates and divergence times in *Human adenovirus* samples. This requires a highly curated data set of time-stamped, homologous, nucleic acid sequences representative of a measurably evolving population [@drummondMeasurablyEvolvingPopulations2003]. Thus, a preprocessing workflow is necessary to extract and normalize sampling date information. The presence of heterogeneous or ambiguous date formats is a complicating factor and a time sink. Also, manual processing becomes intractable as the number of samples increases. As a result, this research defines a generic workflow and automated, parallel pipeline that coordinates the execution of preprocessing and analytical tasks in a reproducible manner. This is a preliminary molecular clock study that replicates an HAdV-4 paper and presents the automated characterization of HAdV-55.
+## Significance
 
-### Significance
+*Human adenovirus* is a diverse pathogen with global distribution that causes sporadic outbreaks. In 1953, an epidemic occurred at the Fort Leonard Wood U.S. Army installation in Missouri. A patient in a large outbreak presented with pneumonia-like symptoms and provided a throat wash sample that contained the first viral isolate, initially called “adenoid degeneration agent” and later adenovirus [@hlllemanRecoveryNewAgent1954; @roweIsolationCytopathogenicAgent1953]. Subsequent outbreaks resulted in the discovery of and characterization of the *Adenoviridae* family.
 
-Human adenovirus is a model organism with significant biotechnology applications. It is also a diverse pathogen with global distribution, causing sporadic outbreaks, originally affecting military populations. Consequently, the U.S. military vaccinates recruits against types E4 and B7. Recent outbreaks of different types in civilian populations are on the rise. B55 is no exception. Data acquired from these outbreaks has yielded a data set suitable for molecular clock analysis. This research characterizes the molecular evolution of B55, testing different clock models and calculating the substitution rate and time to most recent common ancestor (TMRCA). This data helps public health officials make informed decision with respect to biosurveillance efforts and vaccine development for the general population. In addition, these methods are applicable to other emerging types.
+The U.S. military vaccinates recruits against genotypes E4 and B7. Recent outbreaks of different genotypes in civilian populations are on the rise. B55 is no exception and increasingly notorious. Data acquired from these outbreaks have yielded data sets suitable for molecular clock analysis. This preliminary research characterizes molecular evolution, testing different clock models and calculating the substitution rate and time to most recent common ancestor (TMRCA). This data helps public health officials make informed decision with respect to biosurveillance efforts and vaccine development for the general population. In addition, these methods are applicable to other emerging types.
 
-## Methods {.unnumbered}
+## Biology (Summary)
 
-![mep](etc/mep.svg)
+The *Adenoviridae* family includes genera that infect a wide range of hosts and cell types. The *Mastadenovirus* genus includes species that infect mammalian hosts. They are globally distributed, causing sporadic outbreaks in densely populated regions and close-living quarters. Carriers may expose others via aerosol or fecal-oral transmission, potentially asymptomatically [@lynchAdenovirusEpidemiologyGlobal2016]. Symptoms range from acute respiratory disease to organ failure, depending on the viral species and host immune strength [@lynchAdenovirusEpidemiologyGlobal2016]. Accordingly, individuals with developing or weakened immune systems account for most outbreak deaths. The Adenoviridae are class I, linear, double-stranded DNA viruses [@baltimoreExpressionAnimalVirus1971]. The nonenveloped icosahedral nucleocapsid consists of hexon and penton capsomers forming the faces and vertexes respectively. The host coxsackie adenovirus receptor recognizes the fiber knob while the penton RGD motif induces structural changes to gain entry into the host [@petterssonEncountersAdenovirus2019].
 
-This section documents an executable pipeline that constructs data sets for molecular clock analysis. The solution relies on Snakemake, which is a portable, rule-based workflow engine [@kosterSnakemakeScalableBioinformatics2012]. Each rule defines a step in the workflow. A rule can also configure its execution environment via the Conda package manager. The engine automatically infers the workflow path and parallelization based on input dependencies, creating a directed acyclic graph [@kosterSnakemakeScalableBioinformatics2012]. Accordingly, the engine guarantees the reproducibility of each step.
+## B55
 
-### Phase 1: Data Set Generation {.unnumbered}
+The first B55 samples originated during a 20 year period starting in 1965 at the 302nd Hospital in Beijing, China [@liGeneticRelationshipThirteen1991]. In March 1969, the first military outbreak of B55 occurred at the Sant Climent Sescebes camp of Alt Empordà, Girona, Catalonia, Spain [@hierholzerOCCURRENCERESPIRATORYILLNESS1974]. The virus continues spreading throughout the world, primarily affecting civilian populations. Figure 1 plots date ranges for outbreaks associated with surveillance studies [@caoEmergenceCommunityAcquiredAdenovirus2014; @chmielewiczRespiratoryDiseaseCaused2005; @hierholzerOCCURRENCERESPIRATORYILLNESS1974; @jingHouseholdTransmissionHuman2019; @kajonMolecularEpidemiologyAdenovirus1996; @kajonMolecularSerologicalCharacterization2013; @kajonOutbreakFebrileRespiratory2010; @lafolieSeverePneumoniaAssociated2016; @liGeneticRelationshipThirteen1991; @liOutbreakAcuteRespiratory2014; @luEpidemiologyHumanAdenovirus2014; @salamaOutbreakAdenovirusType2016; @sunEmergentSevereAcute2014; @yiClusterAdenovirusType2017; @yooFebrileRespiratoryIllness2017; @zhuOutbreakAcuteRespiratory2009].
 
-The first phase uses a query to generate a set of timestamped, homologous sequences. The execution has two initial paths to process genes and genomes separately. Both paths use different strategies to guarantee full alignment coverage of the query. For genes, the first rule runs the `BLAST+` `blastn` program to perform local alignment and generate a library of sequences. The next rule runs the `FASTA` `glsearch36` program to perform global-local alignment. For genomes, the first rule runs the BLAST+ `blastdbcmd` program to subset the BLAST database by sequence length, accepting those within a percentage deviation of expected size. The next rule runs the `nucmer` and `show-coords` programs of the `MUMmer` genome alignment suite. Each path generates a report of query coverage identity scores.
+B55 is a re-emergent respiratory pathogen with a B14 genomic backbone and a recombinant hexon partially derived from B11 [@walshComputationalAnalysisIdentifies2010]. A new typing scheme that includes genomic analysis corrected it’s previous misidentification as B11a due to limitations associated with serological assays with respect to recombination effects [@walshComputationalAnalysisIdentifies2010].
 
-The next rule defines a Python program that extracts the accessions from the report. It uses an Entrez Direct binding of the `esummary` utility to query GenBank and download a JSON file of the metadata. The final rule processes the JSON file and query coverage identity report. It extracts the "collection_date" qualifier and attempts to normalize it into an ISO-8601 string from a list of formats. The rule then accepts sequences based on an identity threshold and successful date extraction.
-
-### Phase 2: Phylogenetic Analyses {.unnumbered}
-
-The next phase performs phylogenetic analyses on the generated data set. The initial rule runs the `mafft` program to generate a multiple sequence alignment. This program calculates a fast Fourier transform to cluster and progressively align the sequences [@katohMAFFTNovelMethod2002a]. It also automatically sets the optimal program execution mode based on input size and reverse complements any sequence if necessary [@katohMAFFTNovelMethod2002a]. Downstream rules process the resulting FASTA file.
-
-Tree inference occurs in a rule that runs the `iqtree` program to infer a maximum-likelihood tree [@nguyenIQTREEFastEffective2015a]. The program uses `ModelFinder` to calculate the best substitution model based on the Bayesian information criterion [@kalyaanamoorthyModelFinderFastModel2017a]. The "-alrt" and "-bb" flags set the number of bootstrap replicates for the approximate likelihood ratio test of branches and branch support and the "-bnni" flag activates nearest neighbor interchange search optimization strategy [@anisimovaSurveyBranchSupport2011a; @hoangUFBoot2ImprovingUltrafast2018a]. The program outputs a log file and exports the tree in Newick format.
-
-Recombination analysis occurs in a rule that runs the `ClonalFrameML` program. It improves upon the original `ClonalFrame` program by using maximum-likelihood estimation to identify recombinant regions based on the multiple sequence alignment and original tree [@didelotClonalFrameMLEfficientInference2015a; @didelotInferenceBacterialMicroevolution2007]. This step is necessary since recombination obscures temporal analysis [@didelotClonalFrameMLEfficientInference2015a; @rambautExploringTemporalStructure2016a]. Accordingly, the output is a tree based on the clonal frame, the sequence with recombinant regions removed [@milkmanMolecularEvolutionEscherichia1990]. 
-
-Estimation of evolutionary rate and ancestral dates occurs in a rule that uses the `BactDating` R package. The `bactdate` function performs a Markov chain Monte Carlo simulation to estimate parameters for the strict and relaxed clock models [@didelotBayesianInferenceAncestral2018a]. This method considers the `ClonalFrameML` tree to correct for branch lengths potentially affected by recombination [@didelotBayesianInferenceAncestral2018a]. The rule outputs a serialized R data object for downstream analysis.
-
-The pipeline also includes a rule to output BEAST model files. The rule executes a custom Python script that transforms the multiple sequence alignment and `ModelTest` result into an XML file that also specifies the sequence and sampling date for each taxon. The scripts maps the inferred substitution model to a BEAST compatible format. Also, the script includes specifications to run maximum likelihood estimation using the path sampling stepping stone method. The rule exports the XML file for the user to run it on a computational cluster since due to the heavy computational expense. The following section compares the pipeline results using the BEAST XML files to compare the results obtained with the `BactDating` package. 
+## E4
 
 ...
 
-## Results {.unnumbered}
+## Prior Work
 
-### Pipeline Output {.unnumbered}
+Previous adenovirus research has included molecular clock analysis to characterize outbreak samples. A common protocol involves a preliminary pseudo-statistical test of the strict molecular clock hypothesis followed by Markov chain Monte Carlo (MCMC) simulation to estimate model parameters and unknown uncertainties. Tracing each MCMC run evaluates convergence and determines whether the estimates sample size (ESS) of each parameter of interest is acceptable. A model selection step then compares runs with different clock hypotheses, coalescent models, and substitution models. The result is an estimation of model parameters with confidence intervals, such as divergence times and substitution rates. Recent adenovirus research has featured similar protocols. One paper analyzed B55 isolates between June 2009 and January 2012 in Chongqing, China [@luEpidemiologyHumanAdenovirus2014] and another paper analyzed E4 isolates obtained between 1953 and 2015 in the United States and Japan [@gonzalezGenomicCharacterizationHuman2019].
+
+## Proposed Work
+
+...
+
+## Preliminary Work
+
+...
+
+# Methods
+
+![mep](etc/mep.svg)
+
+This section documents an executable pipeline that constructs data sets representative of measurably evolving populations and performs molecular clock analysis. The solution relies on Snakemake, which is a portable, rule-based workflow engine [@kosterSnakemakeScalableBioinformatics2012]. Each rule defines a step in the workflow. A rule can also configure its execution environment via the Conda package manager. The engine automatically infers the workflow path and parallelization based on input dependencies, creating a directed acyclic graph [@kosterSnakemakeScalableBioinformatics2012]. Accordingly, the engine guarantees the reproducibility of each step.
+
+## Phase 1: Data Set Generation
+
+The first phase uses a query to generate a set of timestamped, homologous sequences. The execution has two initial paths to process genes and genomes separately. Both paths use different strategies to guarantee full alignment coverage of the query. For genes, the first rule runs the **BLAST+** `blastn` program to perform local alignment and generate a library of sequences and the next rule runs the **FASTA** `glsearch36` program to perform global-local alignment. For genomes, the first rule runs the **BLAST+** `blastdbcmd` program to subset the BLAST database by sequence length, accepting those within a percentage deviation of expected size and the next rule runs the `nucmer` and `show-coords` programs of the **MUMmer** genome alignment suite. Each path generates a report of query coverage identity scores.
+
+The next rule defines a Python program that extracts the accessions from the report. It uses an **Entrez Direct** binding of the `esummary` utility to query **GenBank** and download a JSON file of the metadata. The final rule processes the JSON file and query coverage identity report. It extracts the "collection_date" qualifier and attempts to normalize it into an ISO-8601 string from a list of formats. The rule then accepts sequences based on an identity threshold and successful date extraction.
+
+## Phase 2: Phylogenetic Analyses
+
+The next phase performs phylogenetic analyses on the generated data set. The initial rule runs the `mafft` program to generate a multiple sequence alignment. This program calculates a fast Fourier transform to cluster and progressively align the sequences [@katohMAFFTNovelMethod2002]. It also automatically sets the optimal program execution mode based on input size and reverse-complements any sequence if necessary [@katohMAFFTNovelMethod2002]. Downstream rules process the resulting FASTA file.
+
+Tree inference occurs in a rule that runs the `iqtree` program to infer a maximum-likelihood tree [@nguyenIQTREEFastEffective2015]. The program uses `ModelFinder` to calculate the best substitution model based on the Bayesian information criterion [@kalyaanamoorthyModelFinderFastModel2017]. The "-alrt" and "-bb" flags set the number of bootstrap replicates for the approximate likelihood ratio test of branches and branch support and the "-bnni" flag activates nearest neighbor interchange search optimization strategy [@anisimovaSurveyBranchSupport2011; @hoangUFBoot2ImprovingUltrafast2018]. The program outputs a log file and exports the tree in Newick format.
+
+...
+
+The pipeline also includes a rule to output BEAST model files. The rule executes a custom Python script that transforms the multiple sequence alignment and `ModelTest` result into an XML file that also specifies the sequence and sampling date for each taxon. The script maps the inferred substitution model to a BEAST compatible format. Clock models include the strict clock, relaxed clock with lognormal distribution, and relaxed clock with exponential distribution [@drummondRelaxedPhylogeneticsDating2006]. Tree priors include the Constant Size and Exponential Growth coalescent models [@griffithsSamplingTheoryNeutral1994; @kingmanCoalescent1982]. Also, the script includes specifications to run maximum likelihood estimation using the path sampling stepping stone method with a Beta path step distribution [@baeleAccurateModelSelection2012; @baeleImprovingAccuracyDemographic2012]. 
+
+# Results (Preliminary)
+
+## Automated HAdV-B55 Analysis
 
 ```{r}
 acc <- "FJ643676.1"
@@ -278,7 +300,7 @@ select(df.res, acc, `BF (PS)`, clock, coal, starts_with(c("age.root.", "meanRate
   row_spec(idx, bold = T)
 ```
 
-### HAdV-4 {.unnumbered}
+## Replication of HAdV-4 Paper
 
 ```{bash, script}
 mkdir -p exp/HAdV-4 && cd exp/HAdV-4
@@ -454,7 +476,9 @@ ggtree(tree, mrsd = paste0(min(tip.date), "-01-01")) +
 ```
 
 ```{r}
-knitr::kable(df.res)
+knitr::kable(df.res, "html")
 ```
 
-## References {.unnumbered}
+# Timeline
+
+# References
