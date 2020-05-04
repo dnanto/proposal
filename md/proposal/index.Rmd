@@ -31,7 +31,10 @@ library(kableExtra)
 # scripts
 source("../scripts/util.R")
 # options
-knitr::opts_chunk$set(echo = F, fig.height = 10, fig.width = 10, fig.align = "center")
+knitr::opts_chunk$set(
+  echo = F, 
+  fig.width = 10, fig.height = 10, fig.fullwidth = TRUE, fig.align = "center"
+)
 # variables
 root <- "exp"
 ```
@@ -48,19 +51,19 @@ This research relies on molecular clock methods to estimate substitution rates a
 
 *Human adenovirus* is a diverse pathogen with global distribution that causes sporadic outbreaks. In 1953, an epidemic occurred at the Fort Leonard Wood U.S. Army installation in Missouri. A patient in a large outbreak presented with pneumonia-like symptoms and provided a throat wash sample that contained the first viral isolate, initially called “adenoid degeneration agent” and later adenovirus [@hlllemanRecoveryNewAgent1954; @roweIsolationCytopathogenicAgent1953]. Subsequent outbreaks resulted in the discovery of and characterization of the *Adenoviridae* family.
 
-The U.S. military vaccinates recruits against genotypes E4 and B7. Recent outbreaks of different genotypes in civilian populations are on the rise. B55 is no exception and increasingly notorious. Data acquired from these outbreaks have yielded data sets suitable for molecular clock analysis. This preliminary research characterizes molecular evolution, testing different clock models and calculating the substitution rate and time to most recent common ancestor (TMRCA). This data helps public health officials make informed decision with respect to biosurveillance efforts and vaccine development for the general population. In addition, these methods are applicable to other emerging types.
+The U.S. military vaccinates recruits against genotypes E4 and B7. Recent outbreaks of different genotypes in civilian populations are on the rise. B55 is no exception and increasingly notorious. Data acquired from these outbreaks have yielded data sets suitable for molecular clock analysis. This preliminary research characterizes molecular evolution by testing different clock models, calculating the substitution rates, and estimating time to most recent common ancestor (TMRCA). This data helps public health officials make informed decision with respect to biosurveillance efforts and vaccine development for the general population. In addition, these methods are applicable to other emerging types.
 
 ## Biology (Summary)
 
-The *Adenoviridae* family includes genera that infect a wide range of hosts and cell types. The *Mastadenovirus* genus includes species that infect mammalian hosts. They are globally distributed, causing sporadic outbreaks in densely populated regions and close-living quarters. Carriers may expose others via aerosol or fecal-oral transmission, potentially asymptomatically [@lynchAdenovirusEpidemiologyGlobal2016]. Symptoms range from acute respiratory disease to organ failure, depending on the viral species and host immune strength [@lynchAdenovirusEpidemiologyGlobal2016]. Accordingly, individuals with developing or weakened immune systems account for most outbreak deaths. The Adenoviridae are class I, linear, double-stranded DNA viruses [@baltimoreExpressionAnimalVirus1971]. The nonenveloped icosahedral nucleocapsid consists of hexon and penton capsomers forming the faces and vertexes respectively. The host coxsackie adenovirus receptor recognizes the fiber knob while the penton RGD motif induces structural changes to gain entry into the host [@petterssonEncountersAdenovirus2019].
+The *Adenoviridae* family includes genera that infect a wide range of hosts and cell types. The *Mastadenovirus* genus includes species that infect mammalian hosts. They are globally distributed, causing sporadic outbreaks in densely populated regions and close-living quarters. Carriers may expose others via aerosol or fecal-oral transmission, potentially asymptomatically [@lynchAdenovirusEpidemiologyGlobal2016]. Symptoms range from acute respiratory disease to organ failure, depending on the viral species and host immune strength [@lynchAdenovirusEpidemiologyGlobal2016]. Accordingly, individuals with developing or weakened immune systems account for most outbreak deaths. The *Adenoviridae* are class I, linear, double-stranded DNA viruses [@baltimoreExpressionAnimalVirus1971]. The nonenveloped icosahedral nucleocapsid consists of hexon and penton capsomers forming the faces and vertexes respectively. The host coxsackie adenovirus receptor recognizes the fiber knob while the penton RGD motif induces structural changes to gain entry into the host [@petterssonEncountersAdenovirus2019].
 
-## B55
+## HAdV-B55
 
 The first B55 samples originated during a 20 year period starting in 1965 at the 302nd Hospital in Beijing, China [@liGeneticRelationshipThirteen1991]. In March 1969, the first military outbreak of B55 occurred at the Sant Climent Sescebes camp of Alt Empordà, Girona, Catalonia, Spain [@hierholzerOCCURRENCERESPIRATORYILLNESS1974]. The virus continues spreading throughout the world, primarily affecting civilian populations. Figure 1 plots date ranges for outbreaks associated with surveillance studies [@caoEmergenceCommunityAcquiredAdenovirus2014; @chmielewiczRespiratoryDiseaseCaused2005; @hierholzerOCCURRENCERESPIRATORYILLNESS1974; @jingHouseholdTransmissionHuman2019; @kajonMolecularEpidemiologyAdenovirus1996; @kajonMolecularSerologicalCharacterization2013; @kajonOutbreakFebrileRespiratory2010; @lafolieSeverePneumoniaAssociated2016; @liGeneticRelationshipThirteen1991; @liOutbreakAcuteRespiratory2014; @luEpidemiologyHumanAdenovirus2014; @salamaOutbreakAdenovirusType2016; @sunEmergentSevereAcute2014; @yiClusterAdenovirusType2017; @yooFebrileRespiratoryIllness2017; @zhuOutbreakAcuteRespiratory2009].
 
 B55 is a re-emergent respiratory pathogen with a B14 genomic backbone and a recombinant hexon partially derived from B11 [@walshComputationalAnalysisIdentifies2010]. A new typing scheme that includes genomic analysis corrected it’s previous misidentification as B11a due to limitations associated with serological assays with respect to recombination effects [@walshComputationalAnalysisIdentifies2010].
 
-## E4
+## HAdV-E4
 
 ...
 
@@ -70,15 +73,16 @@ Previous adenovirus research has included molecular clock analysis to characteri
 
 ## Proposed Work
 
-...
-
-## Preliminary Work
-
-...
+- Hypothesis: the genes that encode surface proteins such evolve faster than those encoding core machinery.
+- Hypothesis: recombination is an evolutionary force for the emergence of new genotypes.
+- Build a pipeline that automates the construction of data set representative of a measurably evolving population.
+- Build a pipeline that automates molecular clock analysis.
+- Build and publish a package that normalizes geographic data.
+- Perform phylogeographic and molecular clock analysis for selected adenovirus genotypes.
 
 # Methods
 
-This section documents an executable pipeline that constructs data sets representative of measurably evolving populations and performs molecular clock analysis. The solution relies on Snakemake, which is a portable, rule-based workflow engine [@kosterSnakemakeScalableBioinformatics2012]. Each rule defines a step in the workflow. A rule can also configure its execution environment via the Conda package manager. The engine automatically infers the workflow path and parallelization based on input dependencies, creating a directed acyclic graph [@kosterSnakemakeScalableBioinformatics2012]. Accordingly, the engine guarantees the reproducibility of each step.
+This section documents an executable pipeline that constructs data sets representative of measurably evolving populations and performs molecular clock analysis. The solution relies on *Snakemake*, which is a portable, rule-based workflow engine [@kosterSnakemakeScalableBioinformatics2012]. Each rule defines a step in the workflow. A rule can also configure its execution environment via the Conda package manager. The engine automatically infers the workflow path and parallelization based on input dependencies, creating a directed acyclic graph [@kosterSnakemakeScalableBioinformatics2012]. Accordingly, the engine guarantees the reproducibility of each step.
 
 ## Pipeline
 
@@ -100,18 +104,18 @@ Recombination analysis occurs in a rule that runs the **Gubbins** program. It in
 
 The pipeline also includes a rule to output **BEAST** model files. The rule executes a custom Python script that transforms the multiple sequence alignment and `ModelTest` result into an XML file that also specifies the sequence and sampling date for each taxon. The script maps the inferred substitution model to a **BEAST** compatible format. Clock models include the strict clock, relaxed clock with lognormal distribution, and relaxed clock with exponential distribution [@drummondRelaxedPhylogeneticsDating2006]. Tree priors include the Constant Size and Exponential Growth coalescent models [@griffithsSamplingTheoryNeutral1994; @kingmanCoalescent1982]. Also, the script includes specifications to run maximum likelihood estimation using the path sampling stepping stone method with a Beta path step distribution [@baeleAccurateModelSelection2012; @baeleImprovingAccuracyDemographic2012]. 
 
-
 ## Geographic Data
 
-...
-
-## Analysis
-
-...
+The geography of an isolate helps to reconstruct outbreak scenarious and is valuable for phylogeographic methods. It is also a problematic field to parse since it is necessary to normalize place names and countries. Preliminary research has yielded a new R package inspired by **lubridate** to this end. The **lubricity** package uses admin code data from the **GeoNames** project to clean such data. The package parses data frame columns with a list of user-specified, named, regular expressions. The name of each capture group corresponds to an administrative division. Matches to higher divisions limit potential matches to lower ones. This avoids issues when names are the same across different countries, etc...
 
 # Results (Preliminary)
 
-## Automated HAdV-B55 Analysis
+BEAST generated trees for the cross-product of clock and population coalescent models. The "rex", "rln", and "str" labels are abbreviations for the relaxed exponential, relaxed lognormal, and strict clock models. The "con" and "exp" labels are abbreviations for the constant and exponential population coalescent models. Note that the strict, constant population model is the null hypothesis. Analysis considers the first 10% of values as burn-in and therefore discards.
+
+The model result tables highlight satisfactory ones in bold. These are models with ESS values greater than or equal to 200 for the joint, prior, likelihood, age(root), and mean(rate) parameters. These tables also display the Bayes factor according to the path-sampling stepping stone method and median value for each parameter. Some models failed to exhibit a sufficient ESS value despite the greater Bayes factor, rendering them unsuitable for further analysis and interpretation. This suggests a need for increasing the simulation chain length. The log trace figures shows the post burn-in value of each parameter as the simulation progressed. The logs demonstrate how the values converged. Only the age(root) a greater variation with rare, large fluctuations at some points.
+
+Each chronogram corresponds to the satisfactory model with targets Bayes factor. The node error bars indicate the 95%-CI height (age) value. Most node heights exhibited small confidence intervals except for an extremely large one at the root, which reflects the variance observed in the log trace figure. This may be due to insufficient chain length, sequencing error, recombination, lack of samples, or local, non-clock behavior.
+
 
 ```{r}
 acc <- "FJ643676.1"
@@ -261,6 +265,7 @@ df.ess <-
 df.est <- 
   mclapply(logs, function(path) {
     parse_beast_log(path) %>%
+      remove_burn_ins(pburn) %>%
       apply(2, median) %>%
       c(path = path)
   }) %>%
@@ -280,10 +285,20 @@ keys <- paste0(c("joint", "prior", "likelihood", "age.root.", "meanRate", "coale
 idx <- (select(df.res, all_of(keys)) >= 200) %>% apply(1, all) %>% which()
 ```
 
+```{r}
+select(df.res, acc, `BF (PS)`, clock, coal, starts_with(c("age.root.", "meanRate")), -path, -state) %>%
+  knitr::kable("html", col.names = c("acc", "BF (PS)", "clock", "coal", c("est" ,"ess", "est" ,"ess"))) %>%
+  add_header_above(c(" " = 2, "model" = 2, "age(root)" = 2, "mean(rate)" = 2)) %>%
+  row_spec(idx, bold = T)
+```
+
+```{r}
+best <- df.res[idx, ] %>% .[.$acc == acc, ] %>% head(1) %>% with(paste0(clock, "-", coal))
+```
+
 ```{r, warning=FALSE}
 tree <-
-  df.res[idx, ] %>% .[.$acc == acc, ] %>% head(1) %>%
-  with(paste0(clock, "-", coal, ".mcc.tree")) %>%
+  paste0(best, ".mcc.tree") %>%
   file.path(root, acc, .) %>%
   read.beast()
 tree@phylo$tip.label <- recode(tree@phylo$tip.label, !!!setNames(meta$relabel, meta$label))
@@ -291,8 +306,7 @@ plot_chronogram(tree)
 ```
 
 ```{r}
-df.res[idx, ] %>% .[.$acc == acc, ] %>% head(1) %>%
-  with(paste0(clock, "-", coal, ".log")) %>%
+paste0(best, ".log") %>%
   file.path(root, acc, .) %>%
   parse_beast_log() %>%
   select(state, joint, prior, likelihood, age.root., meanRate, coalescent) %>%
@@ -303,15 +317,6 @@ df.res[idx, ] %>% .[.$acc == acc, ] %>% head(1) %>%
     facet_wrap(~ statistic, ncol = 1, scales = "free_y", strip.position = "right") +
     theme_minimal()
 ```
-
-```{r}
-select(df.res, acc, `BF (PS)`, clock, coal, starts_with(c("age.root.", "meanRate")), -path, -state) %>%
-  knitr::kable("html", col.names = c("acc", "BF (PS)", "clock", "coal", c("est" ,"ess", "est" ,"ess"))) %>%
-  add_header_above(c(" " = 2, "model" = 2, "age(root)" = 2, "mean(rate)" = 2)) %>%
-  row_spec(idx, bold = T)
-```
-
-## Replication of HAdV-4 Paper
 
 ```{bash, script}
 mkdir -p exp/HAdV-4 && cd exp/HAdV-4
@@ -417,11 +422,11 @@ df.bf <-
   lapply(parse_mle_report) %>%
   bind_rows() %>%
   mutate(acc = basename(dirname(path)), name = basename(path)) %>%
-  separate(name, c("clock", "coalescent"), sep = "[-.]", extra = "drop") %>%
+  separate(name, c("clock", "coal"), sep = "[-.]", extra = "drop") %>%
   group_by(acc) %>%
 	mutate(
-	  `BF (PS)` = PS - PS[which(clock == "str" & coalescent == "con")],
-		`BF (SS)` = SS - SS[which(clock == "str" & coalescent == "con")]
+	  `BF (PS)` = PS - PS[which(clock == "str" & coal == "con")],
+		`BF (SS)` = SS - SS[which(clock == "str" & coal == "con")]
 	) %>%
   ungroup() %>%
   arrange(acc, desc(`BF (PS)`))
@@ -444,33 +449,46 @@ df.ess <-
   map_df(bind_rows) %>%
   mutate(path = basename(path)) %>%
   select(path, everything()) %>%
-  separate(path, c("clock", "coalescent"), sep = "[-.]", extra = "drop") %>%
+  separate(path, c("clock", "coal"), sep = "[-.]", extra = "drop") %>%
   mutate_at(3:ncol(.), as.double)
 
 df.est <-
   mclapply(logs, function(path) {
     parse_beast_log(path) %>%
+      remove_burn_ins(pburn) %>%
       apply(2, median) %>%
       c(path = path)
   }) %>%
   map_df(bind_rows) %>%
   mutate(path = basename(path)) %>%
   select(path, everything()) %>%
-  separate(path, c("clock", "coalescent"), sep = "[-.]", extra = "drop") %>%
+  separate(path, c("clock", "coal"), sep = "[-.]", extra = "drop") %>%
   mutate_at(4:ncol(.), as.double)
+```
 
+```{r}
 df.res <-
-  filter(df.ess, joint >= 200, prior >= 200, likelihood >= 200) %>%
-  select(clock, coalescent) %>%
-  merge(df.bf) %>%
-  merge(df.est) %>%
-  select(clock, coalescent, `BF (PS)`, age.root., meanRate) %>%
-  arrange(desc(`BF (PS)`))
+  merge(df.est, df.ess, by = c("clock", "coal"), suffixes = c(".est", ".ess")) %>%
+  merge(df.bf, ., sort = F)
+
+keys <- paste0(c("joint", "prior", "likelihood", "age.root.", "meanRate", "coalescent"), ".ess")
+idx <- (select(df.res, all_of(keys)) >= 200) %>% apply(1, all) %>% which()
+```
+
+```{r}
+select(df.res, clock, coal, starts_with(c("age.root.", "meanRate")), `BF (PS)`, -path, -state) %>%
+  knitr::kable("html", col.names = c("clock", "coal", c("est" ,"ess", "est" ,"ess"), "BF (PS)")) %>%
+  add_header_above(c("model" = 2, "age(root)" = 2, "mean(rate)" = 2, " " = 1)) %>%
+  row_spec(idx, bold = T)
+```
+
+```{r}
+best <- df.res[idx, ] %>% head(1) %>% with(paste0(clock, "-", coal))
 ```
 
 ```{r, warning=FALSE}
 tree <-
-  with(df.res[1,], paste0(clock, "-", coalescent, ".mcc.tree")) %>%
+  paste0(best, ".mcc.tree") %>%
   file.path(root, subroot, .) %>%
   read.beast()
 
@@ -487,7 +505,16 @@ ggtree(tree, mrsd = paste0(min(tip.date), "-01-01")) +
 ```
 
 ```{r}
-knitr::kable(df.res, "html")
+paste0(best, ".log") %>%
+  file.path(root, acc, .) %>%
+  parse_beast_log() %>%
+  select(state, joint, prior, likelihood, age.root., meanRate, coalescent) %>%
+  filter(state >= max(state) * pburn) %>%
+  pivot_longer(2:ncol(.), names_to = "statistic") %>%
+  ggplot(aes(state, value)) + 
+    geom_path() + 
+    facet_wrap(~ statistic, ncol = 1, scales = "free_y", strip.position = "right") +
+    theme_minimal()
 ```
 
 # Timeline
