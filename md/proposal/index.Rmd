@@ -39,33 +39,43 @@ knitr::opts_chunk$set(
 root <- "exp"
 ```
 
+# Committee {.unnumbered}
+
+George Mason University  
+College of Science  
+School of Systems Biology  
+PhD Bioinformatics and Computational Biology  
+
+Members:  
+- Don Seto, PhD (Chair)  
+- Patrick Gillevet, PhD  
+- Sterling Thomas, PhD  
+
 # Abstract
 
-Members of the *Mastadenovirus* genus include re-emergent, globally-distributed, pathogens with mammalian hosts. Advances in sequencing technology have yielded large, publicly-available data sets that are useful for understanding the genotypes that infect humans. The combination of sequence, isolation date, and location help reconstruct the trajectory of different strains during outbreaks and is crucial for enhancing countermeasure quality. Accordingly, molecular clock techniques cluster samples and estimate divergence times and evolutionary rates. Such data is difficult to assemble and sanitize for large data sets. Thus, the proposed research includes the development of a protocol and automated pipeline that constructs data sets for molecular clock analysis with application to different genotypes. Preliminary analysis compares results to previous studies and tests the hypothesis that external proteins evolve faster than internal ones.
+Members of the *Mastadenovirus* genus include re-emergent, globally-distributed pathogens with mammalian hosts. Advances in sequencing technology have yielded large, publicly-available data sets that are useful for understanding the genotypes that infect humans. The combination of DNA sequence, isolation date, and location help reconstruct the trajectory of different strains during outbreaks and is crucial for enhancing countermeasure quality. Accordingly, molecular clock techniques cluster samples and estimate divergence times and substitution rates. Sample data for such analysis is difficult to assemble and sanitize for large data sets. Thus, the proposed research includes the development of a protocol and automated pipeline that constructs data sets for molecular clock analysis. Preliminary work applied the protocol to the study of genotypes E4 and B55.
 
 # Introduction
 
-This research relies on molecular clock methods to estimate substitution rates and divergence times in *Mastadenovirus* samples. This requires a highly curated data set of time-stamped, homologous, nucleic acid sequences representative of a measurably evolving population [@drummondMeasurablyEvolvingPopulations2003]. Thus, a preprocessing workflow is necessary to extract and normalize sampling date information. The presence of heterogeneous or ambiguous date formats is a complicating factor and a time sink. Also, manual processing becomes intractable as the number of samples increases and potentially generates costly downstream errors. As a result, this research defines a generic workflow and automated, parallel pipeline that coordinates the execution of preprocessing and analytical tasks in a reproducible manner. This is a preliminary molecular clock study that replicates an HAdV-4 paper and presents the automated characterization of HAdV-55.
+This preliminary research relied on molecular clock methods to estimate substitution rates and divergence times in *Mastadenovirus* samples. Such analysis requires a highly curated data set of time-stamped, homologous nucleic acid sequences representative of a measurably evolving population [@drummondMeasurablyEvolvingPopulations2003]. Thus, a preprocessing workflow is necessary to extract and normalize sampling date information. The presence of heterogeneous or ambiguous date formats is a complicating factor and a time sink. Also, manual processing becomes intractable as the number of samples increases and potentially generates costly downstream errors. As a result, this research defines a generic workflow and automated, parallel pipeline that coordinates the reliable execution of preprocessing and analytical tasks in a reproducible manner. This is a preliminary molecular clock study that replicates an HAdV-E4 paper [@gonzalezGenomicCharacterizationHuman2019] and presents the automated characterization of HAdV-B55.
 
 ## Significance
 
-*Human adenovirus* is a diverse pathogen with global distribution that causes sporadic outbreaks. In 1953, an epidemic occurred at the Fort Leonard Wood U.S. Army installation in Missouri. A patient in a large outbreak presented with pneumonia-like symptoms and provided a throat wash sample that contained the first viral isolate, initially called “adenoid degeneration agent” and later adenovirus [@hlllemanRecoveryNewAgent1954; @roweIsolationCytopathogenicAgent1953]. Subsequent outbreaks resulted in the discovery of and characterization of the *Adenoviridae* family.
+*Human adenovirus* is a diverse pathogen with global distribution that causes sporadic outbreaks. In 1953, the first known epidemic occurred at the Fort Leonard Wood U.S. Army installation in Missouri. A patient in this large outbreak presented with pneumonia-like symptoms and provided a throat wash sample that contained the first viral isolate, initially called “adenoid degeneration agent” and later adenovirus [@hillemanRecoveryNewAgent1954; @roweIsolationCytopathogenicAgent1953]. Subsequent outbreaks resulted in the discovery and characterization of the *Adenoviridae* family.
 
-The U.S. military vaccinates recruits against genotypes E4 and B7. Recent outbreaks of different genotypes in civilian populations are on the rise. B55 is no exception and increasingly notorious. Data acquired from these outbreaks have yielded data sets suitable for molecular clock analysis. This preliminary research characterizes molecular evolution by testing different clock models, calculating the substitution rates, and estimating time to most recent common ancestor (TMRCA). This data helps public health officials make informed decision with respect to biosurveillance efforts and vaccine development for the general population. In addition, these methods are applicable to other emerging types.
+Data acquired from various outbreaks have yielded data sets suitable for molecular clock analysis. This preliminary research characterizes molecular evolution by testing clock and population models, calculating substitution rates, and estimating time to most recent common ancestor (TMRCA). This data helps public health officials make informed decision with respect to biosurveillance efforts and vaccine development for the general population. In addition, these methods are applicable to other organisms.
+
+### HAdV-E4
+
+Type 4 has the distinction of being the first recorded adenovirus isolate [@hillemanRecoveryNewAgent1954; @roweIsolationCytopathogenicAgent1953; @topControlAdenovirusAcute1975]. It is also the only member of the E species [@gonzalezGenomicCharacterizationHuman2019]. Evidence also suggests a zoonotic origin with similarity to Simian adenovirus 26 [@dehghanComputationalAnalysisFour2013; @jacobsCharacterizationManipulationHuman2004]. Since 1953, multiple outbreaks have afflicted both military and civilian populations with fatal outcomes [@arigaNewGenomeType2004; @artiedaSwimmingPoolrelatedOutbreak2009; @centersfordiseasecontrolandpreventioncdcTwoFatalCases2001; @dangeloPharyngoconjunctivalFeverCaused1979; @hendrixLargePersistentEpidemic1999; @hillemanRecoveryNewAgent1954; @ishikoSpreadEpidemicKeratoconjunctivitis2009; @kajonAdenovirusTypeRespiratory2018; @kandelOutbreakAdenovirusType2010; @kolavic-grayLargeEpidemicAdenovirus2002; @leeComprehensiveSerotypingEpidemiology2010; @linTwoDecadeSurvey2004; @liSwimmingPoolassociatedOutbreak2018; @mcneillEpidemicSpreadAdenovirus2000; @roweIsolationCytopathogenicAgent1953; @topControlAdenovirusAcute1975; @tulloOutbreakAdenovirusType1980; @vanderveenPatternsInfectionsAdenovirus1969; @yeungCharacterizationCulturepositiveAdenovirus2009; @zhangSurveyRecentAdenoviral2019]. A recent study suggests that this type consists of two phylogroups evolving at different rates [@gonzalezGenomicCharacterizationHuman2019].
+
+### HAdV-B55
+
+B55 is increasingly notorious. The first B55 samples originated during a 20 year period starting in 1965 at the 302nd Hospital in Beijing, China [@liGeneticRelationshipThirteen1991]. In March 1969, the first military outbreak of B55 occurred at the Sant Climent Sescebes camp of Alt Empordà, Girona, Catalonia, Spain [@hierholzerOCCURRENCERESPIRATORYILLNESS1974]. The virus continues spreading throughout the world  [@caoEmergenceCommunityAcquiredAdenovirus2014; @chmielewiczRespiratoryDiseaseCaused2005; @hierholzerOCCURRENCERESPIRATORYILLNESS1974; @jingHouseholdTransmissionHuman2019; @kajonMolecularEpidemiologyAdenovirus1996; @kajonMolecularSerologicalCharacterization2013; @kajonOutbreakFebrileRespiratory2010; @lafolieSeverePneumoniaAssociated2016; @liGeneticRelationshipThirteen1991; @liOutbreakAcuteRespiratory2014; @luEpidemiologyHumanAdenovirus2014; @salamaOutbreakAdenovirusType2016; @sunEmergentSevereAcute2014; @yiClusterAdenovirusType2017; @yooFebrileRespiratoryIllness2017; @zhuOutbreakAcuteRespiratory2009]. B55 is a re-emergent respiratory pathogen with a B14 genomic backbone and a recombinant hexon partially derived from B11 [@walshComputationalAnalysisIdentifies2010]. A new typing scheme that includes genomic analysis corrected it’s previous misidentification as B11a due to limitations associated with serological assays with respect to recombination effects [@walshComputationalAnalysisIdentifies2010].
 
 ## Biology (Summary)
 
-The *Adenoviridae* family includes genera that infect a wide range of hosts and cell types. The *Mastadenovirus* genus includes species that infect mammalian hosts. They are globally distributed, causing sporadic outbreaks in densely populated regions and close-living quarters. Carriers may expose others via aerosol or fecal-oral transmission, potentially asymptomatically [@lynchAdenovirusEpidemiologyGlobal2016]. Symptoms range from acute respiratory disease to organ failure, depending on the viral species and host immune strength [@lynchAdenovirusEpidemiologyGlobal2016]. Accordingly, individuals with developing or weakened immune systems account for most outbreak deaths. The *Adenoviridae* are class I, linear, double-stranded DNA viruses [@baltimoreExpressionAnimalVirus1971]. The nonenveloped icosahedral nucleocapsid consists of hexon and penton capsomers forming the faces and vertexes respectively. The host coxsackie adenovirus receptor recognizes the fiber knob while the penton RGD motif induces structural changes to gain entry into the host [@petterssonEncountersAdenovirus2019].
-
-## HAdV-B55
-
-The first B55 samples originated during a 20 year period starting in 1965 at the 302nd Hospital in Beijing, China [@liGeneticRelationshipThirteen1991]. In March 1969, the first military outbreak of B55 occurred at the Sant Climent Sescebes camp of Alt Empordà, Girona, Catalonia, Spain [@hierholzerOCCURRENCERESPIRATORYILLNESS1974]. The virus continues spreading throughout the world, primarily affecting civilian populations. Figure 1 plots date ranges for outbreaks associated with surveillance studies [@caoEmergenceCommunityAcquiredAdenovirus2014; @chmielewiczRespiratoryDiseaseCaused2005; @hierholzerOCCURRENCERESPIRATORYILLNESS1974; @jingHouseholdTransmissionHuman2019; @kajonMolecularEpidemiologyAdenovirus1996; @kajonMolecularSerologicalCharacterization2013; @kajonOutbreakFebrileRespiratory2010; @lafolieSeverePneumoniaAssociated2016; @liGeneticRelationshipThirteen1991; @liOutbreakAcuteRespiratory2014; @luEpidemiologyHumanAdenovirus2014; @salamaOutbreakAdenovirusType2016; @sunEmergentSevereAcute2014; @yiClusterAdenovirusType2017; @yooFebrileRespiratoryIllness2017; @zhuOutbreakAcuteRespiratory2009].
-
-B55 is a re-emergent respiratory pathogen with a B14 genomic backbone and a recombinant hexon partially derived from B11 [@walshComputationalAnalysisIdentifies2010]. A new typing scheme that includes genomic analysis corrected it’s previous misidentification as B11a due to limitations associated with serological assays with respect to recombination effects [@walshComputationalAnalysisIdentifies2010].
-
-## HAdV-E4
-
-...
+The *Adenoviridae* family includes five genera that infect a wide range of hosts and cell types. The *Mastadenovirus* genus includes seven species (A-G) with over 103 types that infect mammalian hosts [@HadvwgGmuEdu; @lionAdenovirusInfectionsImmunocompetent2014]. They are globally distributed, causing sporadic outbreaks in densely populated regions and close-living quarters. Carriers may expose others via aerosol or fecal-oral transmission, potentially asymptomatically [@lynchAdenovirusEpidemiologyGlobal2016]. Symptoms range from acute respiratory disease to organ failure, depending on the viral species and host immune strength [@lynchAdenovirusEpidemiologyGlobal2016]. Accordingly, individuals with developing or weakened immune systems account for most outbreak deaths. The *Adenoviridae* are class I, linear, double-stranded DNA viruses [@baltimoreExpressionAnimalVirus1971]. The nonenveloped icosahedral nucleocapsid consists of hexon and penton capsomers forming the faces and vertexes respectively. The host coxsackie adenovirus receptor recognizes the fiber knob while the penton RGD motif induces structural changes to gain entry into the host [@petterssonEncountersAdenovirus2019].
 
 ## Prior Work
 
@@ -78,21 +88,21 @@ Previous adenovirus research has included molecular clock analysis to characteri
 - Build a pipeline that automates the construction of data set representative of a measurably evolving population.
 - Build a pipeline that automates molecular clock analysis.
 - Build and publish a package that normalizes geographic data.
-- Perform phylogeographic and molecular clock analysis for selected adenovirus genotypes.
+- Perform phylogeographic and molecular clock analysis for selected adenovirus genotypes: HAdV-E4 & HAdV-B55
 
 # Methods
 
-This section documents an executable pipeline that constructs data sets representative of measurably evolving populations and performs molecular clock analysis. The solution relies on *Snakemake*, which is a portable, rule-based workflow engine [@kosterSnakemakeScalableBioinformatics2012]. Each rule defines a step in the workflow. A rule can also configure its execution environment via the Conda package manager. The engine automatically infers the workflow path and parallelization based on input dependencies, creating a directed acyclic graph [@kosterSnakemakeScalableBioinformatics2012]. Accordingly, the engine guarantees the reproducibility of each step.
+This section documents an executable pipeline that constructs data sets representative of measurably evolving populations and performs molecular clock analysis. The solution relies on **Snakemake**, which is a portable, rule-based workflow engine [@kosterSnakemakeScalableBioinformatics2012]. Each rule defines a step in the workflow. A rule can also configure its execution environment via the Conda package manager. The engine automatically infers the workflow path and parallelization based on input dependencies, creating a directed acyclic graph [@kosterSnakemakeScalableBioinformatics2012]. Accordingly, the engine guarantees the reproducibility of each step.
 
 ## Pipeline
 
 ### Phase 1: Data Set Generation
 
-![phase-1](phase-1.svg)
+![phase-1: measurably evolving population](phase-1.svg)
 
-The first phase uses a query to generate a set of timestamped, homologous sequences. The execution has two initial paths to process genes and genomes separately. Both paths use different strategies to guarantee full alignment coverage of the query. For genes, the first rule runs the **BLAST+** `blastn` program to perform local alignment and generate a library of sequences and the next rule runs the **FASTA** `glsearch36` program to perform global-local alignment. For genomes, the first rule runs the **BLAST+** `blastdbcmd` program to subset the BLAST database by sequence length, accepting those within a percentage deviation of expected size and the next rule runs the `nucmer` and `show-coords` programs of the **MUMmer** genome alignment suite. Each path generates a report of query coverage identity scores.
+The first phase uses a query to generate a set of timestamped, homologous sequences. The execution has two initial paths to process genes and genomes separately. Both paths use different strategies to guarantee full alignment coverage of the query. For genes, the first rule runs the **BLAST+** `blastn` program to perform local alignment and generate a library of sequences and the next rule runs the **FASTA** `glsearch36` program to perform global-local alignment [@camachoBLASTArchitectureApplications2009; @pearsonFASTASearchPrograms2014]. For genomes, the first rule runs the **BLAST+** `blastdbcmd` program to subset the BLAST database by sequence length, accepting those within a percentage deviation of expected size and the next rule runs the `nucmer` and `show-coords` programs of the **MUMmer** genome alignment suite [@marcaisMUMmer4FastVersatile2018]. Each path generates a report of query coverage identity scores.
 
-The next rule defines a Python program that extracts the accessions from the report. It uses an **Entrez Direct** binding of the `esummary` utility to query **GenBank** and download a JSON file of the metadata. The final rule processes the JSON file and query coverage identity report. It extracts the "collection_date" qualifier and attempts to normalize it into an ISO-8601 string from a list of formats. The rule then accepts sequences based on an identity threshold and successful date extraction.
+The next rule defines a Python program that extracts the accessions from the report. It uses an **Entrez Direct** binding of the `esummary` utility to query **GenBank** and download a JSON file of the metadata [@kansEntrezDirectEutilities2020]. The final rule processes the JSON file and query coverage identity report. It extracts the "collection_date" qualifier and attempts to normalize it into an ISO-8601 string from a list of formats. The rule then accepts sequences based on an identity threshold and successful date extraction.
 
 ### Phase 2: Phylogenetic Analyses
 
@@ -102,20 +112,27 @@ Tree inference occurs in a rule that runs the `iqtree` program to infer a maximu
 
 Recombination analysis occurs in a rule that runs the **Gubbins** program. It infers a phylogeny while identifying and accounting for recombination [@croucherRapidPhylogeneticAnalysis2015]. This step is necessary since recombination obscures temporal analysis [@rambautExploringTemporalStructure2016]. Accordingly, the output is a tree based on the clonal frame, the sequence with recombinant regions removed [@milkmanMolecularEvolutionEscherichia1990].
 
-The pipeline also includes a rule to output **BEAST** model files. The rule executes a custom Python script that transforms the multiple sequence alignment and `ModelTest` result into an XML file that also specifies the sequence and sampling date for each taxon. The script maps the inferred substitution model to a **BEAST** compatible format. Clock models include the strict clock, relaxed clock with lognormal distribution, and relaxed clock with exponential distribution [@drummondRelaxedPhylogeneticsDating2006]. Tree priors include the Constant Size and Exponential Growth coalescent models [@griffithsSamplingTheoryNeutral1994; @kingmanCoalescent1982]. Also, the script includes specifications to run maximum likelihood estimation using the path sampling stepping stone method with a Beta path step distribution [@baeleAccurateModelSelection2012; @baeleImprovingAccuracyDemographic2012]. 
+The pipeline also includes a rule to output **BEAST** model files [@suchardBayesianPhylogeneticPhylodynamic2018]. The rule executes a custom Python script that transforms the multiple sequence alignment and `ModelTest` result into an XML file that also specifies the sequence and sampling date for each taxon. The script maps the inferred substitution model to a **BEAST** compatible format. Clock models include the strict clock, relaxed clock with lognormal distribution, and relaxed clock with exponential distribution [@drummondRelaxedPhylogeneticsDating2006]. Tree priors include the Constant Size and Exponential Growth coalescent models [@griffithsSamplingTheoryNeutral1994; @kingmanCoalescent1982]. Also, the script includes specifications to run maximum likelihood estimation using the path sampling stepping stone method with a Beta path step distribution [@baeleAccurateModelSelection2012; @baeleImprovingAccuracyDemographic2012]. 
 
 ## Geographic Data
 
-The geography of an isolate helps to reconstruct outbreak scenarious and is valuable for phylogeographic methods. It is also a problematic field to parse since it is necessary to normalize place names and countries. Preliminary research has yielded a new R package inspired by **lubridate** to this end. The **lubricity** package uses admin code data from the **GeoNames** project to clean such data. The package parses data frame columns with a list of user-specified, named, regular expressions. The name of each capture group corresponds to an administrative division. Matches to higher divisions limit potential matches to lower ones. This avoids issues when names are the same across different countries, etc...
+The geography of an isolate helps to reconstruct outbreak scenarios and is valuable for phylogeographic methods. It is also a problematic field to parse since it is necessary to normalize place names and countries. Preliminary research has yielded a new R package inspired by **lubridate** to this end. The **lubricity** package uses admin code data from the **GeoNames** project to clean such data. The package parses data frame columns with a list of user-specified, named, regular expressions. The name of each capture group corresponds to an administrative division. Matches to higher divisions limit potential matches to lower ones. This avoids issues when names are the same across different countries, etc...
 
 # Results (Preliminary)
 
-BEAST generated trees for the cross-product of clock and population coalescent models. The "rex", "rln", and "str" labels are abbreviations for the relaxed exponential, relaxed lognormal, and strict clock models. The "con" and "exp" labels are abbreviations for the constant and exponential population coalescent models. Note that the strict, constant population model is the null hypothesis. Analysis considers the first 10% of values as burn-in and therefore discards.
+The sequence variation plot highlights mutations inferred from the multiple sequence alignment. These include transitions, transversions, insertions, and deletions. The gray boxes also indicate potential imports into the clonal frame via recombination.
 
-The model result tables highlight satisfactory ones in bold. These are models with ESS values greater than or equal to 200 for the joint, prior, likelihood, age(root), and mean(rate) parameters. These tables also display the Bayes factor according to the path-sampling stepping stone method and median value for each parameter. Some models failed to exhibit a sufficient ESS value despite the greater Bayes factor, rendering them unsuitable for further analysis and interpretation. This suggests a need for increasing the simulation chain length. The log trace figures shows the post burn-in value of each parameter as the simulation progressed. The logs demonstrate how the values converged. Only the age(root) a greater variation with rare, large fluctuations at some points.
+BEAST generated trees for the cross-product of clock and population coalescent models. The "rex", "rln", and "str" labels are abbreviations for the relaxed exponential, relaxed lognormal, and strict clock models. The "con" and "exp" labels are abbreviations for the constant and exponential population coalescent models. Note that the strict, constant population model is the null hypothesis. Analysis considers the first 10% of values as burn-in and therefore discards those states.
+
+The model result tables highlight satisfactory ones in bold. These are models with ESS values greater than or equal to 200 for the joint, prior, likelihood, age(root), and mean(rate) parameters. These tables also display the Bayes factor according to the path-sampling stepping stone method and median value for each parameter. Some models failed to exhibit a sufficient ESS value despite the greater Bayes factor, rendering them unsuitable for further analysis and interpretation. This suggests a need for increasing the simulation chain length. The log trace figures shows the post burn-in value of each parameter as the simulation progressed. The logs demonstrate how the values converged. Only the age(root) a greater variation with rare, large fluctuations at some points. For the HAdV-B55 study, the "acc" column corresponds to sequence accession.
 
 Each chronogram corresponds to the satisfactory model with targets Bayes factor. The node error bars indicate the 95%-CI height (age) value. Most node heights exhibited small confidence intervals except for an extremely large one at the root, which reflects the variance observed in the log trace figure. This may be due to insufficient chain length, sequencing error, recombination, lack of samples, or local, non-clock behavior.
 
+The HAdV-E4 analysis yielded a similar chronogram topology with clear separation of both phylogroups. Analysis also suggests a similar substitution rate of the same order at 4.09e-05 s/y/y. However, the age of the root was much younger compared to that in the paper: 1682.5797 vs 602. The HAdV-B55 analysis yielded an estimate substitution rate of 1.91e-05 s/y/y and TMRCA of 1532.696, comparable to the HAdV-4 result of this study.
+
+## HAdV-B55
+
+### Genomic Sequence Variation
 
 ```{r}
 acc <- "FJ643676.1"
@@ -224,6 +241,8 @@ ggplot() +
   )
 ```
 
+### Model Evaluation
+
 ```{r}
 df.bf <-
   list.files(root, pattern = ".mle.result.log", recursive = T, full.names = T) %>%
@@ -287,14 +306,16 @@ idx <- (select(df.res, all_of(keys)) >= 200) %>% apply(1, all) %>% which()
 
 ```{r}
 select(df.res, acc, `BF (PS)`, clock, coal, starts_with(c("age.root.", "meanRate")), -path, -state) %>%
-  knitr::kable("html", col.names = c("acc", "BF (PS)", "clock", "coal", c("est" ,"ess", "est" ,"ess"))) %>%
-  add_header_above(c(" " = 2, "model" = 2, "age(root)" = 2, "mean(rate)" = 2)) %>%
+  knitr::kable("html", col.names = c("acc", "PS", "clock", "coal", c("est" ,"ess", "est" ,"ess"))) %>%
+  add_header_above(c(" " = 1, "BF", "model" = 2, "age(root)" = 2, "mean(rate)" = 2)) %>%
   row_spec(idx, bold = T)
 ```
 
 ```{r}
 best <- df.res[idx, ] %>% .[.$acc == acc, ] %>% head(1) %>% with(paste0(clock, "-", coal))
 ```
+
+### Chronogram (`r best`)
 
 ```{r, warning=FALSE}
 tree <-
@@ -317,6 +338,10 @@ paste0(best, ".log") %>%
     facet_wrap(~ statistic, ncol = 1, scales = "free_y", strip.position = "right") +
     theme_minimal()
 ```
+
+## HAdV-E4
+
+### Genomic Sequence Variation
 
 ```{bash, script}
 mkdir -p exp/HAdV-4 && cd exp/HAdV-4
@@ -415,6 +440,8 @@ ggplot() +
   )
 ```
 
+### Model Evaluation
+
 ```{r}
 df.bf <-
   file.path(root, subroot) %>%
@@ -476,9 +503,9 @@ idx <- (select(df.res, all_of(keys)) >= 200) %>% apply(1, all) %>% which()
 ```
 
 ```{r}
-select(df.res, clock, coal, starts_with(c("age.root.", "meanRate")), `BF (PS)`, -path, -state) %>%
-  knitr::kable("html", col.names = c("clock", "coal", c("est" ,"ess", "est" ,"ess"), "BF (PS)")) %>%
-  add_header_above(c("model" = 2, "age(root)" = 2, "mean(rate)" = 2, " " = 1)) %>%
+select(df.res, `BF (PS)`, clock, coal, starts_with(c("age.root.", "meanRate")), -path, -state) %>%
+  knitr::kable("html", col.names = c("PS", "clock", "coal", c("est" ,"ess", "est" ,"ess"))) %>%
+  add_header_above(c("BF" = 1, "model" = 2, "age(root)" = 2, "mean(rate)" = 2)) %>%
   row_spec(idx, bold = T)
 ```
 
@@ -486,14 +513,24 @@ select(df.res, clock, coal, starts_with(c("age.root.", "meanRate")), `BF (PS)`, 
 best <- df.res[idx, ] %>% head(1) %>% with(paste0(clock, "-", coal))
 ```
 
-```{r, warning=FALSE}
+### Chronogram (`r best`)
+
+```{r, warning=FALSE, message=FALSE}
 tree <-
   paste0(best, ".mcc.tree") %>%
   file.path(root, subroot, .) %>%
   read.beast()
 
+phylogroup <- 
+  enframe(tree@phylo$tip.label, name = NULL, value = "label") %>% 
+  separate(label, c("accver", "year", "country"), sep = "_", remove = F) %>% 
+  merge(read_tsv("exp/HAdV-4/meta.tsv")) %>% 
+  with(split(label, phylogroup))
+
 tip.date <- str_match(tree@phylo$tip.label, "_(\\d{4})_")[, 2]
-ggtree(tree, mrsd = paste0(min(tip.date), "-01-01")) +
+groupOTU(tree, phylogroup, "phylogroup") %>%
+  ggtree(mrsd = paste0(min(tip.date), "-01-01")) +
+  aes(color = phylogroup) +
   geom_tiplab(linesize = 1, align = T, color = "black") +
   geom_range("height_0.95_HPD") +
   theme_tree2() +
@@ -518,5 +555,58 @@ paste0(best, ".log") %>%
 ```
 
 # Timeline
+
+```{r}
+gannt <- 
+read_tsv("
+project	class	start	finish
+Characterization of an Adenovirus Clinical Isolate	BINF703	August 27, 2018	December 8, 2018
+Minimum Set Cover Problem Pipeline for Multi K-mer Barcoding	BINF703	August 27, 2018	December 8, 2018
+Analysis of Three Adenovirus Outbreaks and an Indel-Calling Algorithm	BINF703	January 22, 2019	May 6, 2019
+Doctoral Dissertation Proposal (1)	BINF998	January 22, 2019	May 6, 2019
+Doctoral Dissertation Proposal (2)	BINF998	May 20, 2019	August 7, 2019
+Doctoral Dissertation Proposal (3)	BINF998	August 26, 2019	December 7, 2019
+US-Japan Joint Panel Conference on Cholera	BINF998	December 10, 2019	December 13, 2019
+Doctoral Dissertation Proposal (4)	BINF998	January 21, 2020	May 11, 2020
+Chapter 1: Adenovirus History	BINF999	June 1, 2020	June 30, 2020
+Chapter 1: Adenovirus Biology	BINF999	June 1, 2020	June 30, 2020
+Chapter 1: HAdV-E4 History	BINF999	July 1, 2020	August 31, 2020
+Chapter 1: HAdV-E4 Biology	BINF999	July 1, 2020	August 31, 2020
+Chapter 1: HAdV-B55 History	BINF999	July 1, 2020	August 31, 2020
+Chapter 1: HAdV-B55 Biology	BINF999	July 1, 2020	August 31, 2020
+Chapter 2: Evolutionary Forces on Sequences	BINF999	September 1, 2020	September 30, 2020
+Chapter 2: Substitution Model Testing	BINF999	September 1, 2020	September 30, 2020
+Chapter 2: Sequence Homology Search Methods	BINF999	September 1, 2020	September 30, 2020
+Chapter 2: Phylogenetic Methods	BINF999	September 1, 2020	September 30, 2020
+Chapter 2: Molecular Clock Models and Methods	BINF999	October 1, 2020	November 30, 2020
+Chapter 2: Clock Signal Testing	BINF999	October 1, 2020	November 30, 2020
+Chapter 2: Molecular Clock Model Testing	BINF999	October 1, 2020	November 30, 2020
+Chapter 2: Data Acquisition/Normalization	BINF999	October 1, 2020	November 30, 2020
+Chapter 2: Reproducibility	BINF999	October 1, 2020	November 30, 2020
+Chapter 2: Pipeline	BINF999	December 1, 2020	January 31, 2021
+Chapter 3: HAdV-E4	BINF999	February 1, 2021	April 30, 2021
+Chapter 4: HAdV-B55	BINF999	February 1, 2021	April 30, 2021
+Chapter 5: Conclusions	BINF999	May 1, 2021	July 31, 2021
+") %>%
+  mutate_at(c("start", "finish"), as.POSIXct, format = "%b %d, %Y") %>%
+  arrange(desc(start))
+
+gannt$project <- factor(gannt$project, levels = gannt$project)
+ggplot() +
+  geom_rect(
+    data = gannt,
+    aes(
+      xmin = start, xmax = finish, 
+      ymin = as.numeric(project) - 0.5, ymax = as.numeric(project) + 0.5,
+      fill = class
+    )
+  ) +
+  scale_x_datetime(labels = scales::date_format("%b %Y"), date_breaks = "1 month") +
+  scale_y_discrete(limits = gannt$project) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
+
+arrange(gannt, start) %>% knitr::kable("html")
+```
 
 # References
