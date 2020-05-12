@@ -1,7 +1,3 @@
-# dissertation
+# introduction
 
-dissertation
-
-# setup
-
-need to update this...
+dissertation proposal...
